@@ -2,3 +2,4 @@
 *.pkl
 *.xlsx
 doc_builder_exploration/
+*.pyc

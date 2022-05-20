@@ -4,13 +4,13 @@ IN: cleaned dataframe
 OUT: dict of dicts, e.g.
 {
     "full":{
-        "basic_stats":{"num_started_and_ended": int, "num_started_but_not_ended": int,
-                        "num_not_started_but_ended": int, "num_ended": int, "num_started": int},
+        "basic_stats":{"n_start_end": int, "n_start_notend": int,
+                        "n_notstart_end": int, "n_end": int, "n_start": int},
 
-        "task_metrics":{"alloccpu":[0,256,45], # [min, max, median] # only include tasks which started AND ended in timeframe
-                        "elapsed":[0,10383739848,2894894]},
+        "task_metrics":{"AllocCPUS":[0,256,45,102], # [min, max, median, mean] # only include tasks which started AND ended in timeframe
+                        "ElapsedRaw":[0,10383739848,2894894,384949237]},
 
-        "termination":{"n_complete":int, "n_cancelled":int, "n_failed":int, "n_timeout":int} # only include tasks which started AND ended in timeframe
+        "termination_stats":{"n_complete":int, "n_cancelled":int, "n_failed":int, "n_timeout":int} # only include tasks which started AND ended in timeframe
     },
         
     "user_split":{
@@ -31,4 +31,176 @@ OUT: dict of dicts, e.g.
 
 }
 })
+
+IMPLEMENTED:
+* Extraction of all metrics
+
+TO IMPLEMENT:
+* Implement decision rules on when to do a user- or a partition split
+* Throw out tasks which did not start or end in the given timeframe for tasc metrics and termination stats
+
 """
+
+import pandas as pd
+import numpy as np
+
+
+class StatsExtractor:
+
+
+    def __init__(self, df):
+        self.df = df
+        self.account = df["Account"][0]
+        self.partitions = df["Partition"].value_counts(ascending=False).index.tolist()
+        self.users = df["User"].value_counts(ascending=False).index.tolist()
+
+
+    def extract_stats(self):
+
+        stats_dict = {}
+
+        # Extract stats for full dataset
+        stats_dict["full"] = {"basic_stats":self.get_basic_stats(split="Full"),
+                              "task_metrics":self.get_task_metrics(split="Full"),
+                              "termination_stats":self.get_termination_stats()
+        }
+
+        stats_dict["user_split"] = {"user_names":self.users,
+                                    "basic_stats":self.get_basic_stats(split="User"),
+                                    "task_metrics":self.get_task_metrics(split="User")
+        }
+
+        stats_dict["partition_split"] = {"partition_names":self.partitions,
+                                         "basic_stats":self.get_basic_stats(split="Partition"),
+                                         "task_metrics":self.get_task_metrics(split="Partition")
+        }
+
+        return stats_dict
+
+    def get_basic_stats(self, split:str="Full"):
+        """
+        Extracts basic stats:
+            * number of jobs started
+            * number of jobs ended
+            * number of jobs started and ended
+            * number of jobs started but not ended
+            * number of jobs not started but ended
+        in the given time period.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Arguments:
+        split: str in ["Full", "User", or "Partition"]; default: "Full".
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Returns:
+        dict with int or list values.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        """
+
+        # If split=="Full", extract stats for full sample
+        if split=="Full":
+
+            basic_dict = {}
+            
+            basic_dict["n_start_end"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
+            basic_dict["n_start_notend"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] > self.df["PeriodEndDate"])).sum()
+            basic_dict["n_notstart_end"] = ((self.df["StartDate"] < self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
+            basic_dict["n_start"] = (self.df["StartDate"] >= self.df["PeriodStartDate"]).sum()
+            basic_dict["n_end"] = (self.df["EndDate"] <= self.df["PeriodEndDate"]).sum()
+
+
+        # If split "User" or "Partition", extract stats for each user or partition
+        elif split=="User" or split=="Partition":
+
+            basic_dict = {"n_start_end":[], "n_start_notend":[], "n_notstart_end":[], "n_start":[], "n_end":[]}
+
+            split_list = self.users if split=="User" else self.partitions # Set appropriate iterable
+
+            for element in split_list:
+                
+                df_sub = self.df[self.df[split] == element] # Slice df down to specific user or partition
+
+                basic_dict["n_start_end"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
+                basic_dict["n_start_notend"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] > df_sub["PeriodEndDate"])).sum())
+                basic_dict["n_notstart_end"].append(((df_sub["StartDate"] < df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
+                basic_dict["n_start"].append((df_sub["StartDate"] >= df_sub["PeriodStartDate"]).sum())
+                basic_dict["n_end"].append((df_sub["EndDate"] <= df_sub["PeriodEndDate"]).sum())
+                
+        else:
+            raise NameError("Please set the 'split' argument to 'Full', 'User', or 'Partition'.")
+        return basic_dict
+
+
+    def get_task_metrics(self, split:str="Full"):
+        """
+        Extracts task metrics:
+            * number of allocated CPUs
+            * elapsed time
+            * CPU time
+        in the given time period.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Arguments:
+        split: str in ["Full", "User", or "Partition"]; default: "Full".
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Returns:
+        dict with int or list values.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        """
+
+        metrics = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
+
+        if split=="Full":
+
+            metrics_dict = {}
+
+            for metric in metrics:
+                metrics_dict[metric] = [self.df[metric].min(), self.df[metric].max(), self.df[metric].median(), round(self.df[metric].mean(),3)]
+
+        elif split=="User" or split=="Partition":
+            
+            metrics_dict = {m:[] for m in metrics}
+
+            split_list = self.users if split=="User" else self.partitions # Set appropriate iterable
+
+            for element in split_list:
+                
+                df_sub = self.df[self.df[split] == element] # Slice df down to specific user or partition
+                
+                for metric in metrics:
+                    metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].max(), df_sub[metric].median(), round(df_sub[metric].mean(),3)])
+                
+
+        return metrics_dict
+
+
+    def get_termination_stats(self):
+        """
+        Extracts task metrics:
+            * number of completed tasks
+            * number of cancelled tasks
+            * number of failed tasks
+            * number of timeouted tasks
+        in the given time period.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Arguments:
+        No arguments.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Returns:
+        dict with int.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        """
+
+        termination_dict = {}
+
+        termination_dict["n_complete"] = (self.df["State"] == "COMPLETED").sum()
+        termination_dict["n_cancelled"] = (self.df["State"] == "CANCELLED").sum()
+        termination_dict["n_failed"] = (self.df["State"] == "FAILED").sum()
+        termination_dict["n_timeout"] = (self.df["State"] == "TIMEOUT").sum()
+
+        return termination_dict
+
+
+
+
+        
+
+
+

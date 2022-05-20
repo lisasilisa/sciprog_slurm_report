@@ -35,10 +35,6 @@ OUT: dict of dicts, e.g.
 IMPLEMENTED:
 * Extraction of all metrics
 
-TO IMPLEMENT:
-* Implement decision rules on when to do a user- or a partition split
-* Throw out tasks which did not start or end in the given timeframe for tasc metrics and termination stats
-
 """
 
 import pandas as pd
@@ -50,7 +46,7 @@ class StatsExtractor:
 
     def __init__(self, df):
         self.df = df
-        self.account = df["Account"][0]
+        self.account = df["Account"]#[0]
         self.partitions = df["Partition"].value_counts(ascending=False).index.tolist()
         self.users = df["User"].value_counts(ascending=False).index.tolist()
 
@@ -65,15 +61,17 @@ class StatsExtractor:
                               "termination_stats":self.get_termination_stats()
         }
 
-        stats_dict["user_split"] = {"user_names":self.users,
-                                    "basic_stats":self.get_basic_stats(split="User"),
-                                    "task_metrics":self.get_task_metrics(split="User")
-        }
+        if len(self.users) >= 2:
+            stats_dict["user_split"] = {"user_names":self.users,
+                                        "basic_stats":self.get_basic_stats(split="User"),
+                                        "task_metrics":self.get_task_metrics(split="User")
+            }
 
-        stats_dict["partition_split"] = {"partition_names":self.partitions,
-                                         "basic_stats":self.get_basic_stats(split="Partition"),
-                                         "task_metrics":self.get_task_metrics(split="Partition")
-        }
+        if len(self.partitions) >= 2:
+            stats_dict["partition_split"] = {"partition_names":self.partitions,
+                                            "basic_stats":self.get_basic_stats(split="Partition"),
+                                            "task_metrics":self.get_task_metrics(split="Partition")
+            }
 
         return stats_dict
 
@@ -145,6 +143,8 @@ class StatsExtractor:
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         """
 
+        df_time_sub = self.df[(self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])]
+
         metrics = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
 
         if split=="Full":
@@ -152,7 +152,7 @@ class StatsExtractor:
             metrics_dict = {}
 
             for metric in metrics:
-                metrics_dict[metric] = [self.df[metric].min(), self.df[metric].max(), self.df[metric].median(), round(self.df[metric].mean(),3)]
+                metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].max(), df_time_sub[metric].median(), round(df_time_sub[metric].mean(),3)]
 
         elif split=="User" or split=="Partition":
             
@@ -162,7 +162,7 @@ class StatsExtractor:
 
             for element in split_list:
                 
-                df_sub = self.df[self.df[split] == element] # Slice df down to specific user or partition
+                df_sub = df_time_sub[df_time_sub[split] == element] # Slice df down to specific user or partition
                 
                 for metric in metrics:
                     metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].max(), df_sub[metric].median(), round(df_sub[metric].mean(),3)])
@@ -187,13 +187,14 @@ class StatsExtractor:
         dict with int.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         """
+        df_time_sub = self.df[(self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])]
 
         termination_dict = {}
 
-        termination_dict["n_complete"] = (self.df["State"] == "COMPLETED").sum()
-        termination_dict["n_cancelled"] = (self.df["State"] == "CANCELLED").sum()
-        termination_dict["n_failed"] = (self.df["State"] == "FAILED").sum()
-        termination_dict["n_timeout"] = (self.df["State"] == "TIMEOUT").sum()
+        termination_dict["n_complete"] = (df_time_sub["State"] == "COMPLETED").sum()
+        termination_dict["n_cancelled"] = (df_time_sub["State"] == "CANCELLED").sum()
+        termination_dict["n_failed"] = (df_time_sub["State"] == "FAILED").sum()
+        termination_dict["n_timeout"] = (df_time_sub["State"] == "TIMEOUT").sum()
 
         return termination_dict
 

@@ -13,6 +13,8 @@ def data_cleaner(dataset, account:str, period_start_date:str, period_end_date:st
     subset = clean_state_col(subset)
     subset = get_rel_time_data(subset, period_start_date, period_end_date)
     subset = get_account_data(subset, account)
+    subset["PeriodStartDate"] = period_start_date
+    subset["PeriodEndDate"] = period_end_date
     return subset
 
 
@@ -67,7 +69,6 @@ def get_rel_time_data(dataset, period_start_date:str, period_end_date:str):
     subset = dataset[(dataset['StartDate'] < period_start_date_dt) | (dataset['StartDate'] > period_end_date_dt)] # Aufträge die nicht in Zeitspanne starten
     subset = subset[(subset['EndDate'] < period_start_date_dt) | (subset['EndDate'] > period_end_date_dt)] # Aufträge die zusätzlich auch nicht in Zeitspanne enden
     dataset = dataset[~dataset.index.isin(subset.index)] # alle Aufträge außer denen die weder in Zeitspanne anfangen oder enden 
-
 
     return dataset
 

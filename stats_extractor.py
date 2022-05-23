@@ -4,8 +4,7 @@ IN: cleaned dataframe
 OUT: dict of dicts, e.g.
 {
     "full":{
-        "basic_stats":{"n_start_end": int, "n_start_notend": int,
-                        "n_notstart_end": int, "n_end": int, "n_start": int},
+        "basic_stats":{"n_start_end": int, "n_end": int, "n_start": int},
 
         "task_metrics":{"AllocCPUS":[0,256,45,102], # [min, max, median, mean] # only include tasks which started AND ended in timeframe
                         "ElapsedRaw":[0,10383739848,2894894,384949237]},
@@ -99,8 +98,8 @@ class StatsExtractor:
             basic_dict = {}
             
             basic_dict["n_start_end"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
-            basic_dict["n_start_notend"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] > self.df["PeriodEndDate"])).sum()
-            basic_dict["n_notstart_end"] = ((self.df["StartDate"] < self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
+            #basic_dict["n_start_notend"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] > self.df["PeriodEndDate"])).sum()
+            #basic_dict["n_notstart_end"] = ((self.df["StartDate"] < self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
             basic_dict["n_start"] = (self.df["StartDate"] >= self.df["PeriodStartDate"]).sum()
             basic_dict["n_end"] = (self.df["EndDate"] <= self.df["PeriodEndDate"]).sum()
 
@@ -117,8 +116,8 @@ class StatsExtractor:
                 df_sub = self.df[self.df[split] == element] # Slice df down to specific user or partition
 
                 basic_dict["n_start_end"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
-                basic_dict["n_start_notend"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] > df_sub["PeriodEndDate"])).sum())
-                basic_dict["n_notstart_end"].append(((df_sub["StartDate"] < df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
+                #basic_dict["n_start_notend"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] > df_sub["PeriodEndDate"])).sum())
+                #basic_dict["n_notstart_end"].append(((df_sub["StartDate"] < df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
                 basic_dict["n_start"].append((df_sub["StartDate"] >= df_sub["PeriodStartDate"]).sum())
                 basic_dict["n_end"].append((df_sub["EndDate"] <= df_sub["PeriodEndDate"]).sum())
                 

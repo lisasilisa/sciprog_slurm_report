@@ -46,7 +46,7 @@ class StatsExtractor:
 
     def __init__(self, df):
         self.df = df
-        self.account = df["Account"]#[0]
+        self.account = df["Account"].iloc[0]
         self.partitions = df["Partition"].value_counts(ascending=False).index.tolist()
         self.users = df["User"].value_counts(ascending=False).index.tolist()
 

@@ -6,8 +6,9 @@ OUT: dict of dicts, e.g.
     "full":{
         "basic_stats":{"n_start_end": int, "n_end": int, "n_start": int},
 
-        "task_metrics":{"AllocCPUS":[0,256,45,102], # [min, max, median, mean] # only include tasks which started AND ended in timeframe
-                        "ElapsedRaw":[0,10383739848,2894894,384949237]},
+        "task_metrics":{"AllocCPUS":[0,25,45,102,256,60], # [min, 25quant, median, 75quant, max, mean] # only include tasks which started AND ended in timeframe
+                        "ElapsedRaw":[0,238484,10383739848,2894894556,39438484384,949237]},
+                        "CPUTIME":...}
 
         "termination_stats":{"n_complete":int, "n_cancelled":int, "n_failed":int, "n_timeout":int} # only include tasks which started AND ended in timeframe
     },
@@ -15,8 +16,8 @@ OUT: dict of dicts, e.g.
     "user_split":{
         "user_names": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
-        "task_metrics": {"alloccpu":[[user1min, user1max, user1median],
-                                     [user2min, user2max, user2median]
+        "task_metrics": {"alloccpu":[[user1min, user125quant, user1median, user1max, user1mean],
+                                     [user2min, user225quant, user2median, user275quant, user2mean]
                                      ...]}
         # NO TERMINATION SUBDICT
     },
@@ -151,7 +152,8 @@ class StatsExtractor:
             metrics_dict = {}
 
             for metric in metrics:
-                metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].max(), df_time_sub[metric].median(), round(df_time_sub[metric].mean(),3)]
+                metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].quantile(.25), df_time_sub[metric].median(),
+                                        df_time_sub[metric].median(), df_time_sub[metric].quantile(.75), round(df_time_sub[metric].mean(),3)]
 
         elif split=="User" or split=="Partition":
             
@@ -164,7 +166,8 @@ class StatsExtractor:
                 df_sub = df_time_sub[df_time_sub[split] == element] # Slice df down to specific user or partition
                 
                 for metric in metrics:
-                    metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].max(), df_sub[metric].median(), round(df_sub[metric].mean(),3)])
+                    metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].quantile(.25), df_sub[metric].median(),
+                                                df_sub[metric].quantile(.75), round(df_sub[metric].mean(),3)])
                 
 
         return metrics_dict

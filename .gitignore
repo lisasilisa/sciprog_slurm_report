@@ -3,3 +3,4 @@
 *.xlsx
 doc_builder_exploration/
 *.pyc
+*.json

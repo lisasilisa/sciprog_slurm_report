@@ -12,7 +12,7 @@ OUT: dict of dicts, e.g.
 
         "termination_stats":{"n_complete":int, "n_cancelled":int, "n_failed":int, "n_timeout":int} # only include tasks which started AND ended in timeframe
     },
-        
+
     "user_split":{
         "user_names": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
@@ -28,7 +28,6 @@ OUT: dict of dicts, e.g.
         "task_metrics": ...,
         # NO TERMINATION SUBDICT
     }
-
 }
 })
 
@@ -107,8 +106,8 @@ class StatsExtractor:
 
         # If split "User" or "Partition", extract stats for each user or partition
         elif split=="User" or split=="Partition":
-
-            basic_dict = {"n_start_end":[], "n_start_notend":[], "n_notstart_end":[], "n_start":[], "n_end":[]}
+            print('\n'+split+'\n')
+            basic_dict = {"n_start_end":[], "n_start":[], "n_end":[]}
 
             split_list = self.users if split=="User" else self.partitions # Set appropriate iterable
 

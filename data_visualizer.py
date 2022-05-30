@@ -15,6 +15,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+######################
+## HELPER FUNCTIONS ##
+######################
+
+def determine_grid_size(n_plots):
+
+    i, j = 1, 1
+    while i*j < n_plots:
+        if i > j+1:
+            if (i-1)*(j+1) == n_plots:
+                return i-1,j+1
+            else:
+                j += 1
+        else:
+            i += 1
+    return i,j
+
+#####################
+## DATA VISUALIZER ##
+#####################
+
 class DataVisualizer:
 
     def __init__(self, stats_dict:str, plot_config:dict=None):

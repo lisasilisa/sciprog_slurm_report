@@ -17,7 +17,7 @@ import matplotlib.ticker as ticker
 
 class DataVisualizer:
 
-    def __init__(self, stats_dict:str, plot_config:dict):
+    def __init__(self, stats_dict:str, plot_config:dict=None):
         
         self.stats_dict = stats_dict
         self.plot_config = plot_config
@@ -45,8 +45,10 @@ class DataVisualizer:
         end_and_start = ax.bar(0.4, values['n_start_end'], color='brown', width=0.2, alpha=0.8, label ='Started + Ended: ' + str(values['n_start_end'])) 
         
         ax.set_xlabel(None)
-        ax.set_xticks([0,0.4], ['Started', 'Ended'], fontsize=12)
-        ax.set_ylabel('Tasks', fontsize=15)
+        ax.set_xticks([0,0.4])
+        ax.set_xticklabels(['Started', 'Ended'])
+        ax.tick_params(axis="x", labelsize=12)
+        ax.set_ylabel('Tasks', size=15)
         ax.tick_params(bottom=False, left=True)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)

@@ -152,7 +152,7 @@ class StatsExtractor:
 
             for metric in metrics:
                 metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].quantile(.25), df_time_sub[metric].median(),
-                                        df_time_sub[metric].median(), df_time_sub[metric].quantile(.75), round(df_time_sub[metric].mean(),3)]
+                df_time_sub[metric].quantile(.75), df_time_sub[metric].max(), round(df_time_sub[metric].mean(),3)]
 
         elif split=="User" or split=="Partition":
             
@@ -166,7 +166,7 @@ class StatsExtractor:
                 
                 for metric in metrics:
                     metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].quantile(.25), df_sub[metric].median(),
-                                                df_sub[metric].quantile(.75), round(df_sub[metric].mean(),3)])
+                                                df_sub[metric].quantile(.75), df_sub[metric].max(), round(df_sub[metric].mean(),3)])
                 
 
         return metrics_dict

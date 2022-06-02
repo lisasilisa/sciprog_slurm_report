@@ -17,6 +17,9 @@ S = StatsExtractor(df)
 stats_dict = S.extract_stats()
 
 # Intialize visualizer
+
+#print(stats_dict["user_split"]["task_metrics"].keys())
+
 Viz = DataVisualizer(stats_dict)
 
 #################
@@ -24,4 +27,4 @@ Viz = DataVisualizer(stats_dict)
 #################
 
 # Basic stats
-Viz.plot_basic_stats(split="full")
+Viz.plot_task_metrics(split="partition_split")

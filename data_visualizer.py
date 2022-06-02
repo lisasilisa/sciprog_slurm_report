@@ -20,6 +20,9 @@ import matplotlib.ticker as ticker
 ######################
 
 def determine_grid_size(n_plots):
+    """
+    Determines an appropriate multiplot grid size to arange <n_plots> plots.
+    """
 
     i, j = 1, 1
     while i*j < n_plots:
@@ -145,13 +148,94 @@ class DataVisualizer:
         Plots stats on CPUTime, Elapsed time and AllocCPUS in a boxplot.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         Arguments:
-        split: str in ["full", "user_split", "partition"_split"]
+        split: str in ["full", "user_split", "partition_split"]
         export_path: None or path to export plot to
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         Returns:
         None
         """
-        pass
+
+        metric_labels = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
+        display_labels = ["Allocated CPUs", "Elapsed Time (min)", "CPU Time (min)"]
+        
+        # Create plot for full sample
+        if split == "full":
+
+            # Load data from dict
+            data = np.zeros((len(metric_labels), 6), dtype=int)
+            for i, label in enumerate(metric_labels):
+                data[i,:] = self.stats_dict["full"]["task_metrics"][label]
+
+            # Convert raw time to minutes
+            data[1,:] = data[1,:] / 60 / 60
+            data[2,:] = data[2,:] / 60 / 60
+
+            # Start plot
+            fig, axs = plt.subplots(3,1)
+
+            for i, label in enumerate(display_labels):
+                # Plot
+                axs[i].boxplot(data[i,:], usermedians=[data[i,2]],
+                whis=[0,100], vert=False)
+                # Axes
+                axs[i].set_yticks([])
+                # Labels
+                axs[i].set_xlabel("")
+                axs[i].set_yticks([])
+                axs[i].set_ylabel(label, rotation=90)
+                # Other
+                axs[i].xaxis.grid(linestyle=":")
+            
+            plt.show()
+
+        # Otherwise get split data
+        elif split in ["user_split", "partition_split"]:
+            
+            # Get unique users/partitions
+            if split=="user_split":
+                split_labels = self.stats_dict["user_split"]["user_names"]
+            else:
+                split_labels = self.stats_dict["partition_split"]["partition_names"]
+
+            # Load data
+            data = np.zeros((len(metric_labels),6,len(split_labels)),dtype=int)
+            for i, metric_label in enumerate(metric_labels):
+                for j, split_label in enumerate(split_labels):
+                    for k in range(6):
+                        data[i,k,j] = self.stats_dict[split]["task_metrics"][metric_label][j][k]
+            # Convert raw time to minutes
+            data[1,:,:] = data[1,:,:] / 60 / 60
+            data[2,:,:] = data[2,:,:] / 60 / 60
+
+            # Start plot
+            fig, axs = plt.subplots(3,1)
+
+            for i, metric_label in enumerate(metric_labels):
+                
+                # Plot
+                axs[i].boxplot(data[i,:,:], usermedians=data[i,2,:],
+                                whis=[0,100], vert=True)
+                # Axes
+                axs[i].set_ylabel(display_labels[i])
+                axs[i].set_xticklabels(split_labels)
+                # Labels
+                # Other
+
+            plt.show()
+                
+
+
+        
+
+            
+
+
+
+
+
+
+
+
 
     def plot_termination_stats(self, export_path=None):
         """

@@ -47,48 +47,6 @@ class DataVisualizer:
         self.plot_config = plot_config
 
 
-    def __plotting_helper(self, ax, values:dict):
-        """
-        Creates the plot for one user/partition or for the whole account
-        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-        Arguments:
-        ax: axes object
-        values: dict in format {'n_start_end': 200, 'n_start': 2569, 'n_end': 2586}
-        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-        Returns:
-        axes object
-        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-        """
-        
-        start = ax.bar(0, values['n_start'], color='lightgreen', width=0.2, label='Started \ Ended: ' + str(values['n_start']-values['n_start_end'])) 
-        
-        end = ax.bar(0.4, values['n_end'], color='lightcoral',width=0.2, label='Ended \ Started: ' + str(values['n_end']-values['n_start_end']))
-        
-        start_and_end = ax.bar(0, values['n_start_end'], color='green', width=0.2, alpha=0.8, label='Started + Ended: ' + str(values['n_start_end'])) 
-        
-        end_and_start = ax.bar(0.4, values['n_start_end'], color='brown', width=0.2, alpha=0.8, label ='Started + Ended: ' + str(values['n_start_end'])) 
-        
-        ax.set_xlabel(None)
-        ax.set_xticks([0,0.4])
-        ax.set_xticklabels(['Started', 'Ended'])
-        ax.tick_params(axis="x", labelsize=12)
-        ax.set_ylabel('Tasks', size=15)
-        ax.tick_params(bottom=False, left=True)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-        
-        rects = ax.patches
-        labels = [values['n_start'], values['n_end']]
-
-        for rect, label in zip(rects, labels):
-            height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width() / 2, height, label, ha="center", va="bottom")
-        
-        ax.legend(loc = 'center', handles = [start, start_and_end, end, end_and_start])
-        return ax
-   
-    
     def plot_basic_stats(self, split:str="full", export_path=None):    
         """
         Plots stats on the number of started/ended jobs in a barchart.
@@ -101,46 +59,79 @@ class DataVisualizer:
         None
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-        TO IMPLEMENT: handle export_path 
+        TO IMPLEMENT: 
+        * handle export_path 
+        * How to sort bar_plots descending: according to started or finished jobs? 
+
         """
         
         if split == "full":
-            fig, ax = plt.subplots(figsize=(6,6))
-            values = self.stats_dict['full']['basic_stats'] 
-            ax = self.__plotting_helper(ax, values)
-            ax.plot()
+            
+            start_value = self.stats_dict['full']['basic_stats']['n_start']
+            end_value = self.stats_dict['full']['basic_stats']['n_end']
+
+            fig, ax = plt.subplots(figsize=(3,4))
+
+            start_bar = ax.bar(0, start_value, color='lightgreen', width=0.1) 
+            end_bar = ax.bar(0.2, end_value, color='lightcoral', width=0.1) 
+
+            ax.set_ylabel('Tasks', size=15)
+
+            ax.set_xticks([0,0.2])
+            ax.set_xticklabels(['Started', 'Ended'])
+
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+
+            ax.bar_label(start_bar, padding=3)
+            ax.bar_label(end_bar, padding=3)
+            
+            fig.tight_layout()
+
             plt.show()
             
             
-        elif split =="user_split":
-            if self.stats_dict[split]:
-                amount_of_users = len(self.stats_dict['user_split']['user_names'])
+        elif split in ["user_split", "partition_split"]:
 
-                for i in range(amount_of_users):
-                    values = {}
-                    for start, amount in self.stats_dict['user_split']['basic_stats'].items():
-                        values[start] = amount[i]
-                    
-                    fig, ax = plt.subplots(figsize=(6,6))
-                    ax.title.set_text('User: ' + str(self.stats_dict['user_split']['user_names'][i])) 
-                    ax = self.__plotting_helper(ax, values)
-                    ax.plot()
-                plt.show()
-                    
-        elif split == "partition_split":
             if self.stats_dict[split]:
-                amount_of_partitions = len(self.stats_dict['partition_split']['partition_names'])
                 
-                for i in range(amount_of_partitions):
-                    values = {}
-                    for start, amount in self.stats_dict['partition_split']['basic_stats'].items():
-                        values[start] = amount[i]
-                    
-                    fig, ax = plt.subplots(figsize=(6,6))
-                    ax.title.set_text('Partition: ' + str(self.stats_dict['partition_split']['partition_names'][i])) 
-                    ax = self.__plotting_helper(ax, values)
-                    ax.plot()
+                fig, ax = plt.subplots()
+
+
+                if split == "user_split":
+                    names = self.stats_dict['user_split']['user_names'] # user names
+                    x_labels = [names[i][-5:] for i in range(len(names))] # last 5 characters from username
+                    start_values = self.stats_dict['user_split']['basic_stats']['n_start']
+                    end_values = self.stats_dict['user_split']['basic_stats']['n_end']
+                    ax.set_xlabel('User Names (last 5 character)')
+
+                elif split == "partition_split":
+                    x_labels = self.stats_dict['partition_split']['partition_names'] # user names
+                    start_values = self.stats_dict['partition_split']['basic_stats']['n_start']
+                    end_values = self.stats_dict['partition_split']['basic_stats']['n_end']
+                    ax.set_xlabel('Partitions')
+                
+                x = np.arange(len(x_labels))  # the label locations
+                width = 0.35
+
+                rects1 = ax.bar(x - width/2, start_values, color ='lightgreen', width=width, label='Started')
+                rects2 = ax.bar(x + width/2, end_values, color = 'lightcoral', width=width, label='Ended')
+
+                ax.set_ylabel('Tasks')
+                ax.set_xticks(x, x_labels)
+
+                ax.spines['top'].set_visible(False)
+                ax.spines['right'].set_visible(False)
+
+                ax.legend()
+
+                ax.bar_label(rects1, padding=3)
+                ax.bar_label(rects2, padding=3)
+
+                fig.tight_layout()
+
                 plt.show()
+
             
 
     def plot_task_metrics(self, split:str="full", export_path=None):

@@ -15,6 +15,7 @@ OUT: dict of dicts, e.g.
 
     "user_split":{
         "user_names": list,
+        "user_counts": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
         "task_metrics": {"alloccpu":[[user1min, user125quant, user1median, user1max, user1mean],
                                      [user2min, user225quant, user2median, user275quant, user2mean]
@@ -24,6 +25,7 @@ OUT: dict of dicts, e.g.
 
     "partition_split:{
         "partition_names": list,
+        "partition_counts": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
         "task_metrics": ...,
         # NO TERMINATION SUBDICT
@@ -47,7 +49,9 @@ class StatsExtractor:
         self.df = df
         self.account = df["Account"].iloc[0]
         self.partitions = df["Partition"].value_counts(ascending=False).index.tolist()
+        self.partition_counts = df["Partition"].value_counts(ascending=False).values.tolist()
         self.users = df["User"].value_counts(ascending=False).index.tolist()
+        self.user_counts = df["User"].value_counts(ascending=False).values.tolist()
 
 
     def extract_stats(self):
@@ -62,12 +66,14 @@ class StatsExtractor:
 
         if len(self.users) >= 2:
             stats_dict["user_split"] = {"user_names":self.users,
+                                        "user_counts":self.user_counts,
                                         "basic_stats":self.get_basic_stats(split="User"),
                                         "task_metrics":self.get_task_metrics(split="User")
             }
 
         if len(self.partitions) >= 2:
             stats_dict["partition_split"] = {"partition_names":self.partitions,
+                                            "partition_counts":self.partition_counts,
                                             "basic_stats":self.get_basic_stats(split="Partition"),
                                             "task_metrics":self.get_task_metrics(split="Partition")
             }
@@ -151,8 +157,8 @@ class StatsExtractor:
             metrics_dict = {}
 
             for metric in metrics:
-                metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].quantile(.25), df_time_sub[metric].median(),
-                df_time_sub[metric].quantile(.75), df_time_sub[metric].max(), round(df_time_sub[metric].mean(),3)]
+                metrics_dict[metric] = [df_time_sub[metric].min(), df_time_sub[metric].quantile(.05), df_time_sub[metric].quantile(.25), df_time_sub[metric].median(),
+                df_time_sub[metric].quantile(.75), df_time_sub[metric].quantile(.95), df_time_sub[metric].max(), round(df_time_sub[metric].mean(),3)]
 
         elif split=="User" or split=="Partition":
             
@@ -165,8 +171,8 @@ class StatsExtractor:
                 df_sub = df_time_sub[df_time_sub[split] == element] # Slice df down to specific user or partition
                 
                 for metric in metrics:
-                    metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].quantile(.25), df_sub[metric].median(),
-                                                df_sub[metric].quantile(.75), df_sub[metric].max(), round(df_sub[metric].mean(),3)])
+                    metrics_dict[metric].append([df_sub[metric].min(), df_sub[metric].quantile(.05), df_sub[metric].quantile(.25), df_sub[metric].median(),
+                                                df_sub[metric].quantile(.75), df_sub[metric].quantile(.95), df_sub[metric].max(), round(df_sub[metric].mean(),3)])
                 
 
         return metrics_dict

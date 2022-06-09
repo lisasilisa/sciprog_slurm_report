@@ -47,7 +47,7 @@ class DataVisualizer:
         self.plot_config = plot_config
 
 
-    def plot_basic_stats(self, split:str="full", export_path=None):    
+    def plot_basic_stats(self, split:str="full", export_path=None):
         """
         Plots stats on the number of started/ended jobs in a barchart.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -72,13 +72,13 @@ class DataVisualizer:
 
             fig, ax = plt.subplots(figsize=(3,4))
 
-            start_bar = ax.bar(0, start_value, color='lightgreen', width=0.1) 
-            end_bar = ax.bar(0.2, end_value, color='lightcoral', width=0.1) 
+            start_bar = ax.barh(y = 0.2 , width = start_value, color='lightgreen', height=0.1) 
+            end_bar = ax.barh(y = 0, width = end_value, color='lightcoral', height=0.1) 
 
-            ax.set_ylabel('Tasks', size=15)
+            ax.set_xlabel('Tasks', size=15)
 
-            ax.set_xticks([0,0.2])
-            ax.set_xticklabels(['Started', 'Ended'])
+            ax.set_yticks([0,0.2])
+            ax.set_yticklabels(['Started', 'Ended'])
 
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -99,31 +99,31 @@ class DataVisualizer:
 
 
                 if split == "user_split":
-                    names = self.stats_dict['user_split']['user_names'] # user names
-                    x_labels = [names[i][-5:] for i in range(len(names))] # last 5 characters from username
+                    y_labels = self.stats_dict['user_split']['user_names'] # user names
                     start_values = self.stats_dict['user_split']['basic_stats']['n_start']
                     end_values = self.stats_dict['user_split']['basic_stats']['n_end']
-                    ax.set_xlabel('User Names (last 5 character)')
+                    ax.set_xlabel('User names')
 
                 elif split == "partition_split":
-                    x_labels = self.stats_dict['partition_split']['partition_names'] # user names
+                    y_labels = self.stats_dict['partition_split']['partition_names'] # user names
                     start_values = self.stats_dict['partition_split']['basic_stats']['n_start']
                     end_values = self.stats_dict['partition_split']['basic_stats']['n_end']
                     ax.set_xlabel('Partitions')
                 
-                x = np.arange(len(x_labels))  # the label locations
-                width = 0.35
+                y = np.arange(len(y_labels))  # the label locations
+                height = 0.35
 
-                rects1 = ax.bar(x - width/2, start_values, color ='lightgreen', width=width, label='Started')
-                rects2 = ax.bar(x + width/2, end_values, color = 'lightcoral', width=width, label='Ended')
+                rects1 = ax.barh(y = y + height/2, width = start_values, color ='lightgreen', height=height, label='Started')
+                rects2 = ax.barh(y = y - height/2, width = end_values, color = 'lightcoral', height=height, label='Ended')
 
-                ax.set_ylabel('Tasks')
-                ax.set_xticks(x, x_labels)
+                ax.set_xlabel('Tasks')
+                ax.set_yticks(y, y_labels)
+                ax.invert_yaxis()
 
                 ax.spines['top'].set_visible(False)
                 ax.spines['right'].set_visible(False)
 
-                ax.legend()
+                ax.legend(loc = 'lower right')
 
                 ax.bar_label(rects1, padding=3)
                 ax.bar_label(rects2, padding=3)
@@ -131,7 +131,6 @@ class DataVisualizer:
                 fig.tight_layout()
 
                 plt.show()
-
             
 
     def plot_task_metrics(self, split:str="full", export_path=None):
@@ -225,30 +224,37 @@ class DataVisualizer:
             plt.show()
                 
 
-
-        
-
-            
-
-
-
-
-
-
-
-
-
     def plot_termination_stats(self, export_path=None):
         """
         Plots termination stats in a donut chart.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         Arguments:
-        split: str in ["full", "user_split", "partition"_split"]
         export_path: None or path to export plot to
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         Returns:
         None
         """
-        pass
+
+        termination_stats = self.stats_dict['full']['termination_stats']
+        termination_stats_updated = {k:v for k,v in termination_stats.items() if v!=0} # drop entries with value = 0
+
+        names = [att.split('_')[1] for att in list(termination_stats_updated.keys())]
+        values = list(termination_stats_updated.values())
+
+        def make_autopct(values):
+            def my_autopct(pct):
+                total = sum(values)
+                val = int(round(pct*total/100.0))
+                return '{v:d}'.format(v=val)
+            return my_autopct
+
+        plt.pie(values, labels=names, autopct=make_autopct(values), pctdistance=0.85)
+        
+        my_circle=plt.Circle( (0,0), 0.7, color='white')
+        p=plt.gcf()
+        p.gca().add_artist(my_circle)
+
+        plt.show()
+
 
 

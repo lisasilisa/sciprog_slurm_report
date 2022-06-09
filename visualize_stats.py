@@ -27,4 +27,4 @@ Viz = DataVisualizer(stats_dict)
 #################
 
 # Basic stats
-Viz.plot_task_metrics(split="partition_split")
+Viz.plot_task_metrics(split="user_split")

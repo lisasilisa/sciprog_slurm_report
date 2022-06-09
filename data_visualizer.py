@@ -153,9 +153,9 @@ class DataVisualizer:
         if split == "full":
 
             # Load data from dict
-            data = np.zeros((len(metric_labels), 6), dtype=int)
+            data = np.zeros((len(metric_labels), 5), dtype=int)
             for i, label in enumerate(metric_labels):
-                data[i,:] = self.stats_dict["full"]["task_metrics"][label]
+                data[i,:] = self.stats_dict["full"]["task_metrics"][label][1:-3]
 
             # Convert raw time to minutes
             data[1,:] = data[1,:] / 60 / 60
@@ -185,8 +185,13 @@ class DataVisualizer:
             # Get unique users/partitions
             if split=="user_split":
                 split_labels = self.stats_dict["user_split"]["user_names"]
+                split_counts = self.stats_dict["user_split"]["user_counts"]
             else:
                 split_labels = self.stats_dict["partition_split"]["partition_names"]
+                split_counts = self.stats_dict["partition_split"]["partition_counts"]
+
+            # Keep only partitions/users with minimum of 10 tasks
+            split_labels = [label for label, count in zip(split_labels, split_counts) if count >= 10]
 
             # Load data
             data = np.zeros((len(metric_labels),6,len(split_labels)),dtype=int)
@@ -194,6 +199,7 @@ class DataVisualizer:
                 for j, split_label in enumerate(split_labels):
                     for k in range(6):
                         data[i,k,j] = self.stats_dict[split]["task_metrics"][metric_label][j][k]
+
             # Convert raw time to minutes
             data[1,:,:] = data[1,:,:] / 60 / 60
             data[2,:,:] = data[2,:,:] / 60 / 60
@@ -208,9 +214,13 @@ class DataVisualizer:
                                 whis=[0,100], vert=True)
                 # Axes
                 axs[i].set_ylabel(display_labels[i])
-                axs[i].set_xticklabels(split_labels)
                 # Labels
+                if i == len(metric_labels)-1:
+                    axs[i].set_xticklabels(split_labels)
+                else:
+                    axs[i].set_xticks([])
                 # Other
+                axs[i].yaxis.grid(linestyle=":")
 
             plt.show()
                 

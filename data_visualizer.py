@@ -87,8 +87,6 @@ class DataVisualizer:
             ax.bar_label(end_bar, padding=3)
             
             fig.tight_layout()
-
-            plt.show()
             
             
         elif split in ["user_split", "partition_split"]:
@@ -117,7 +115,8 @@ class DataVisualizer:
                 rects2 = ax.barh(y = y - height/2, width = end_values, color = 'lightcoral', height=height, label='Ended')
 
                 ax.set_xlabel('Tasks')
-                ax.set_yticks(y, y_labels)
+                ax.set_yticks(ticks=y)
+                ax.set_yticklabels(y_labels, rotation=0)
                 ax.invert_yaxis()
 
                 ax.spines['top'].set_visible(False)
@@ -130,7 +129,16 @@ class DataVisualizer:
 
                 fig.tight_layout()
 
-                plt.show()
+        # Export plot if requested, else just display it
+        if export_path:
+            dpi = 300 # fixate this in the plot dict?
+            # If export path has no file ending, add one
+            if export_path.split(".")[-1] == "jpg":
+                plt.savefig(export_path, dpi=dpi)
+            else:
+                plt.savefig(export_path+".jpg", dpi=dpi)
+        else:
+            plt.show()
             
 
     def plot_task_metrics(self, split:str="full", export_path=None):
@@ -154,29 +162,29 @@ class DataVisualizer:
             # Load data from dict
             data = np.zeros((len(metric_labels), 5), dtype=int)
             for i, label in enumerate(metric_labels):
-                data[i,:] = self.stats_dict["full"]["task_metrics"][label][1:-3]
+                data[i,:] = self.stats_dict["full"]["task_metrics"][label][1:-2]
 
             # Convert raw time to minutes
-            data[1,:] = data[1,:] / 60 / 60
-            data[2,:] = data[2,:] / 60 / 60
+            data[1,:] = data[1,:] / 60
+            data[2,:] = data[2,:] / 60
 
             # Start plot
-            fig, axs = plt.subplots(3,1)
+            fig, axs = plt.subplots(1,3, figsize = (12,4))
 
             for i, label in enumerate(display_labels):
                 # Plot
                 axs[i].boxplot(data[i,:], usermedians=[data[i,2]],
-                whis=[0,100], vert=False)
+                whis=[0,100], vert=True)
                 # Axes
-                axs[i].set_yticks([])
+                offset = 0.1*data[i,3]
+                axs[i].set_ylim(0-offset,data[i,-1]+offset)
                 # Labels
                 axs[i].set_xlabel("")
-                axs[i].set_yticks([])
-                axs[i].set_ylabel(label, rotation=90)
+                axs[i].set_xticks([])
+                #axs[i].set_ylabel(label, rotation=90)
+                axs[i].set_title(label)
                 # Other
-                axs[i].xaxis.grid(linestyle=":")
-            
-            plt.show()
+                axs[i].yaxis.grid(linestyle=":")
 
         # Otherwise get split data
         elif split in ["user_split", "partition_split"]:
@@ -200,8 +208,8 @@ class DataVisualizer:
                         data[i,k,j] = self.stats_dict[split]["task_metrics"][metric_label][j][k]
 
             # Convert raw time to minutes
-            data[1,:,:] = data[1,:,:] / 60 / 60
-            data[2,:,:] = data[2,:,:] / 60 / 60
+            data[1,:,:] = data[1,:,:] / 60
+            data[2,:,:] = data[2,:,:] / 60
 
             # Start plot
             fig, axs = plt.subplots(3,1)
@@ -213,6 +221,10 @@ class DataVisualizer:
                                 whis=[0,100], vert=True)
                 # Axes
                 axs[i].set_ylabel(display_labels[i])
+                offset = 0.5*np.max(data[i,4,:])
+                y_min, y_max = 0, np.max(data[i,-1,:])
+                axs[i].set_ylim(y_min-offset, y_max+offset)
+                #axs[i].set_yticks([tick for tick in axs[i].get_yticks()])
                 # Labels
                 if i == len(metric_labels)-1:
                     axs[i].set_xticklabels(split_labels)
@@ -220,7 +232,16 @@ class DataVisualizer:
                     axs[i].set_xticks([])
                 # Other
                 axs[i].yaxis.grid(linestyle=":")
-
+            
+        # Export plot if requested, else just display it
+        if export_path:
+            dpi = 300 # fixate this in the plot dict?
+            # If export path has no file ending, add one
+            if export_path.split(".")[-1] == "jpg":
+                plt.savefig(export_path, dpi=dpi)
+            else:
+                plt.savefig(export_path+".jpg", dpi=dpi)
+        else:
             plt.show()
                 
 
@@ -254,7 +275,16 @@ class DataVisualizer:
         p=plt.gcf()
         p.gca().add_artist(my_circle)
 
-        plt.show()
+        # Export plot if requested, else just display it
+        if export_path:
+            dpi = 300 # fixate this in the plot dict?
+            # If export path has no file ending, add one
+            if export_path.split(".")[-1] == "jpg":
+                plt.savefig(export_path, dpi=dpi)
+            else:
+                plt.savefig(export_path+".jpg", dpi=dpi)
+        else:
+            plt.show()
 
 
 

@@ -4,3 +4,5 @@
 doc_builder_exploration/
 *.pyc
 *.json
+*.jpg
+*.png

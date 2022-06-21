@@ -15,6 +15,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+import matplotlib.colors as colors
+import matplotlib.cm as cmx
+
+
 ######################
 ## HELPER FUNCTIONS ##
 ######################
@@ -34,6 +38,7 @@ def determine_grid_size(n_plots):
         else:
             i += 1
     return i,j
+
 
 #####################
 ## DATA VISUALIZER ##
@@ -64,21 +69,23 @@ class DataVisualizer:
         * How to sort bar_plots descending: according to started or finished jobs? 
 
         """
+
+        
         
         if split == "full":
             
             start_value = self.stats_dict['full']['basic_stats']['n_start']
             end_value = self.stats_dict['full']['basic_stats']['n_end']
 
-            fig, ax = plt.subplots(figsize=(3,4))
+            fig, ax = plt.subplots() #figsize=(3,4)
 
-            start_bar = ax.barh(y = 0.2 , width = start_value, color='lightgreen', height=0.1) 
-            end_bar = ax.barh(y = 0, width = end_value, color='lightcoral', height=0.1) 
+            end_bar = ax.barh(y = 0, width = end_value, color=self.plot_config['c_map'](0.8), height=self.plot_config['bar_width']) 
+            start_bar = ax.barh(y = 1 , width = start_value, color=self.plot_config['c_map'](0.2), height=self.plot_config['bar_width']) 
 
-            ax.set_xlabel('Tasks', size=15)
+            ax.set_xlabel('Tasks')
 
-            ax.set_yticks([0,0.2])
-            ax.set_yticklabels(['Started', 'Ended'])
+            ax.set_yticks([0,1])
+            ax.set_yticklabels(['Ended', 'Started'])
 
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -95,7 +102,6 @@ class DataVisualizer:
                 
                 fig, ax = plt.subplots()
 
-
                 if split == "user_split":
                     y_labels = self.stats_dict['user_split']['user_names'] # user names
                     start_values = self.stats_dict['user_split']['basic_stats']['n_start']
@@ -103,17 +109,16 @@ class DataVisualizer:
                     ax.set_xlabel('User names')
 
                 elif split == "partition_split":
-                    y_labels = self.stats_dict['partition_split']['partition_names'] # user names
+                    y_labels = self.stats_dict['partition_split']['partition_names'] # partition names
                     start_values = self.stats_dict['partition_split']['basic_stats']['n_start']
                     end_values = self.stats_dict['partition_split']['basic_stats']['n_end']
                     ax.set_xlabel('Partitions')
                 
                 y = np.arange(len(y_labels))  # the label locations
-                height = 0.35
 
-                rects1 = ax.barh(y = y + height/2, width = start_values, color ='lightgreen', height=height, label='Started')
-                rects2 = ax.barh(y = y - height/2, width = end_values, color = 'lightcoral', height=height, label='Ended')
-
+                rects1 = ax.barh(y = y - self.plot_config['bar_width']/2, width = start_values, color = self.plot_config['c_map'](0.8), height=self.plot_config['bar_width'], label='Started')
+                rects2 = ax.barh(y = y + self.plot_config['bar_width']/2, width = end_values, color = self.plot_config['c_map'](0.2), height=self.plot_config['bar_width'], label='Ended')
+                
                 ax.set_xlabel('Tasks')
                 ax.set_yticks(ticks=y)
                 ax.set_yticklabels(y_labels, rotation=0)
@@ -122,7 +127,7 @@ class DataVisualizer:
                 ax.spines['top'].set_visible(False)
                 ax.spines['right'].set_visible(False)
 
-                ax.legend(loc = 'lower right')
+                ax.legend(loc = self.plot_config['leg_loc'], fontsize = self.plot_config['leg_font_size'])
 
                 ax.bar_label(rects1, padding=3)
                 ax.bar_label(rects2, padding=3)
@@ -131,12 +136,11 @@ class DataVisualizer:
 
         # Export plot if requested, else just display it
         if export_path:
-            dpi = 300 # fixate this in the plot dict?
             # If export path has no file ending, add one
             if export_path.split(".")[-1] == "jpg":
-                plt.savefig(export_path, dpi=dpi)
+                plt.savefig(export_path, dpi=self.plot_config['dpi'])
             else:
-                plt.savefig(export_path+".jpg", dpi=dpi)
+                plt.savefig(export_path+".jpg", dpi=self.plot_config['dpi'])
         else:
             plt.show()
             
@@ -155,6 +159,7 @@ class DataVisualizer:
 
         metric_labels = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
         display_labels = ["Allocated CPUs", "Elapsed Time (min)", "CPU Time (min)"]
+        medianprops = dict(color=self.plot_config['c_map'](0.5))
         
         # Create plot for full sample
         if split == "full":
@@ -168,13 +173,15 @@ class DataVisualizer:
             data[1,:] = data[1,:] / 60
             data[2,:] = data[2,:] / 60
 
+            print('data', data)
             # Start plot
-            fig, axs = plt.subplots(1,3, figsize = (12,4))
+            fig, axs = plt.subplots(1,3)
 
             for i, label in enumerate(display_labels):
                 # Plot
+
                 axs[i].boxplot(data[i,:], usermedians=[data[i,2]],
-                whis=[0,100], vert=True)
+                whis=[0,100], vert=True, medianprops=medianprops)
                 # Axes
                 offset = 0.1*data[i,3]
                 axs[i].set_ylim(0-offset,data[i,-1]+offset)
@@ -185,6 +192,9 @@ class DataVisualizer:
                 axs[i].set_title(label)
                 # Other
                 axs[i].yaxis.grid(linestyle=":")
+
+
+            fig.tight_layout()
 
         # Otherwise get split data
         elif split in ["user_split", "partition_split"]:
@@ -202,23 +212,24 @@ class DataVisualizer:
 
             # Load data
             data = np.zeros((len(metric_labels),6,len(split_labels)),dtype=int)
+            
             for i, metric_label in enumerate(metric_labels):
                 for j, split_label in enumerate(split_labels):
                     for k in range(6):
                         data[i,k,j] = self.stats_dict[split]["task_metrics"][metric_label][j][k]
+            
 
             # Convert raw time to minutes
             data[1,:,:] = data[1,:,:] / 60
             data[2,:,:] = data[2,:,:] / 60
 
             # Start plot
-            fig, axs = plt.subplots(3,1)
+            fig, axs = plt.subplots(3,1) #,figsize=(4,12)
 
             for i, metric_label in enumerate(metric_labels):
                 
                 # Plot
-                axs[i].boxplot(data[i,:,:], usermedians=data[i,2,:],
-                                whis=[0,100], vert=True)
+                axs[i].boxplot(data[i,:,:], usermedians=data[i,2,:], whis=[0,100], vert=True, medianprops=medianprops)
                 # Axes
                 axs[i].set_ylabel(display_labels[i])
                 offset = 0.5*np.max(data[i,4,:])
@@ -232,15 +243,16 @@ class DataVisualizer:
                     axs[i].set_xticks([])
                 # Other
                 axs[i].yaxis.grid(linestyle=":")
+
+            fig.tight_layout()
             
         # Export plot if requested, else just display it
         if export_path:
-            dpi = 300 # fixate this in the plot dict?
             # If export path has no file ending, add one
             if export_path.split(".")[-1] == "jpg":
-                plt.savefig(export_path, dpi=dpi)
+                plt.savefig(export_path, dpi=self.plot_config['dpi'])
             else:
-                plt.savefig(export_path+".jpg", dpi=dpi)
+                plt.savefig(export_path+".jpg", dpi=self.plot_config['dpi'])
         else:
             plt.show()
                 
@@ -261,28 +273,34 @@ class DataVisualizer:
 
         names = [att.split('_')[1] for att in list(termination_stats_updated.keys())]
         values = list(termination_stats_updated.values())
-
-        def make_autopct(values):
-            def my_autopct(pct):
-                total = sum(values)
-                val = int(round(pct*total/100.0))
-                return '{v:d}'.format(v=val)
-            return my_autopct
-
-        plt.pie(values, labels=names, autopct=make_autopct(values), pctdistance=0.85)
         
-        my_circle=plt.Circle( (0,0), 0.7, color='white')
+        color_range = range(len(values))
+        cNorm  = colors.Normalize(vmin=0, vmax=color_range[-1])
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=self.plot_config['c_map'])
+
+        color_list = []
+        for i in color_range:
+            colorVal = scalarMap.to_rgba(i)
+            color_list.append(colorVal)
+
+        patches, _ = plt.pie(values, colors = color_list) #labels=names, autopct=make_autopct(values), pctdistance=0.85,
+        labels = [f"{i}: {j}" for i,j in zip(names, values)]
+
+        patches, labels, _ =  zip(*sorted(zip(patches, labels, values),key=lambda x: x[2], reverse=True))
+
+        plt.legend(patches, labels, loc=self.plot_config['leg_loc'], bbox_to_anchor=(1.3, 0.8))
+           
+        my_circle=plt.Circle((0,0), 0.7, color='white')
         p=plt.gcf()
         p.gca().add_artist(my_circle)
 
         # Export plot if requested, else just display it
         if export_path:
-            dpi = 300 # fixate this in the plot dict?
             # If export path has no file ending, add one
             if export_path.split(".")[-1] == "jpg":
-                plt.savefig(export_path, dpi=dpi)
+                plt.savefig(export_path, dpi=self.plot_config['dpi'])
             else:
-                plt.savefig(export_path+".jpg", dpi=dpi)
+                plt.savefig(export_path+".jpg", dpi=self.plot_config['dpi'])
         else:
             plt.show()
 

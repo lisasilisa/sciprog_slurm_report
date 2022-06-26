@@ -2,7 +2,13 @@
 *.pkl
 *.xlsx
 doc_builder_exploration/
+build_document.py
+visualize_stats.py
+extract_stats.py
+fig/
 *.pyc
 *.json
 *.jpg
 *.png
+*.tex
+*.pdf

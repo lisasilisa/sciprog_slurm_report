@@ -51,6 +51,25 @@ class DataVisualizer:
         self.stats_dict = stats_dict
         self.plot_config = plot_config
 
+    def plot_all(self):
+        
+        # Basic stats
+        self.plot_basic_stats(split="full", export_path="fig/basic_stats_full.jpg")
+        if "user_split" in self.stats_dict.keys():
+            self.plot_basic_stats(split="user_split", export_path="fig/basic_stats_user_split.jpg")
+        if "partition_split" in self.stats_dict.keys():
+            self.plot_basic_stats(split="partition_split", export_path="fig/basic_stats_partition_split.jpg")
+
+        # Task metrics
+        self.plot_task_metrics(split="full", export_path="fig/task_metrics_full.jpg")
+        if "user_split" in self.stats_dict.keys():
+            self.plot_task_metrics(split="user_split", export_path="fig/task_metrics_user_split.jpg")
+        if "partition_split" in self.stats_dict.keys():
+            self.plot_task_metrics(split="partition_split", export_path="fig/task_metrics_partition_split.jpg")
+
+        # Termination stats
+        self.plot_termination_stats(export_path="fig/termination_stats_full.jpg")
+
 
     def plot_basic_stats(self, split:str="full", export_path=None):
         """
@@ -69,8 +88,6 @@ class DataVisualizer:
         * How to sort bar_plots descending: according to started or finished jobs? 
 
         """
-
-        
         
         if split == "full":
             
@@ -173,9 +190,8 @@ class DataVisualizer:
             data[1,:] = data[1,:] / 60
             data[2,:] = data[2,:] / 60
 
-            print('data', data)
             # Start plot
-            fig, axs = plt.subplots(1,3)
+            fig, axs = plt.subplots(1,3, figsize=(9,4))
 
             for i, label in enumerate(display_labels):
                 # Plot

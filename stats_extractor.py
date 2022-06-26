@@ -8,7 +8,7 @@ OUT: dict of dicts, e.g.
 
         "task_metrics":{"AllocCPUS":[0,25,45,102,256,60], # [min, 25quant, median, 75quant, max, mean] # only include tasks which started AND ended in timeframe
                         "ElapsedRaw":[0,238484,10383739848,2894894556,39438484384,949237]},
-                        "CPUTIME":...}
+                        "CPUTimeRaw":...}
 
         "termination_stats":{"n_complete":int, "n_cancelled":int, "n_failed":int, "n_timeout":int} # only include tasks which started AND ended in timeframe
     },
@@ -112,7 +112,7 @@ class StatsExtractor:
 
         # If split "User" or "Partition", extract stats for each user or partition
         elif split=="User" or split=="Partition":
-            print('\n'+split+'\n')
+            
             basic_dict = {"n_start_end":[], "n_start":[], "n_end":[]}
 
             split_list = self.users if split=="User" else self.partitions # Set appropriate iterable

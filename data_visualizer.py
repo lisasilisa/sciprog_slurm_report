@@ -282,6 +282,8 @@ class DataVisualizer:
         for i in color_range:
             colorVal = scalarMap.to_rgba(i)
             color_list.append(colorVal)
+        
+        fig, ax = plt.subplots(1)
 
         patches, _ = plt.pie(values, colors = color_list) #labels=names, autopct=make_autopct(values), pctdistance=0.85,
         labels = [f"{i}: {j}" for i,j in zip(names, values)]

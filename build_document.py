@@ -15,7 +15,7 @@ from pylatex.utils import italic, NoEscape
 ###########
 
 # Load df
-df = pd.read_csv("dev_df.csv")
+df = pd.read_csv("dev_df_v2.csv")
 account_id = '59628c0f-aa89-4a69' # id associated with the dev df
 
 # Initialize StatExtractor
@@ -156,7 +156,7 @@ with doc.create(Section("Task Metrics")):
         
         # Display plot
         with doc.create(Figure(position="h!")) as fig:
-            fig.add_image("fig/task_metrics_full.jpg", width="350px")
+            fig.add_image("fig/task_metrics_full.jpg", width="400px")
             fig.add_caption("Distributions of job duration, allocated CPUs, and CPU time. Whiskers indicate the 5th and 95th percentiles.")  
 
     doc.append(NoEscape(r"\pagebreak"))
@@ -239,6 +239,13 @@ with doc.create(Section("Termination Stats")):
         {data['n_timeout']} were ended due to a timeout,\
         and {data['n_failed']} failed for other reasons."
         )
+    
+    # Add figure
+    with doc.create(Figure(position="h!")) as fig:
+        fig.add_image("fig/termination_stats_full.jpg", width="300px")
+        fig.add_caption("Termination stats for the full sample.")
+
+
 
 # Export pdf
 doc.generate_pdf(clean_tex=False)

@@ -9,7 +9,7 @@ from data_visualizer import DataVisualizer
 from plot_config import set_plot_config
 
 # Load df
-df = pd.read_csv("dev_df.csv")
+df = pd.read_csv("dev_df_v2.csv")
 
 # Initialize StatExtractor
 S = StatsExtractor(df)

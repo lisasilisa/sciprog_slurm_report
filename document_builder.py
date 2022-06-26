@@ -1,9 +1,9 @@
 import numpy as np
-from pylatex import Document, LongTable
+from pylatex import Document, LongTable, Table, Tabular, Tabularx
 from pylatex.utils import bold
 
-def build_longtable(doc:Document, data: np.ndarray, col_names: list[str]=None,
-                    position_codes:list[str]=None, index:list[str]=None):
+def build_table(doc:Document, data: np.ndarray, col_names: list=None,
+                    position_codes:list=None, index:list=None):
 
     # Get data dimensions
     m, n = data.shape
@@ -23,7 +23,7 @@ def build_longtable(doc:Document, data: np.ndarray, col_names: list[str]=None,
             position_codes = "l | " + position_codes
 
     # Generate table
-    with doc.create(LongTable(position_codes)) as table:
+    with doc.create(Tabularx(position_codes)) as table:
 
         # Add header
         if not index:
@@ -31,7 +31,7 @@ def build_longtable(doc:Document, data: np.ndarray, col_names: list[str]=None,
         else:
             table.add_row([""] + col_names, mapper=bold)
         table.add_hline()
-        table.end_table_header()
+        #table.end_table_header()
         
         # Add data
         for i in range(m):
@@ -40,6 +40,3 @@ def build_longtable(doc:Document, data: np.ndarray, col_names: list[str]=None,
             else:
                 table.add_row([index[i]] + list(data[i,:]))
         table.add_hline()
-
-def include_image(doc, img_path):
-    pass

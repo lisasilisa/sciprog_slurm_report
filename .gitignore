@@ -2,9 +2,7 @@
 *.pkl
 *.xlsx
 doc_builder_exploration/
-build_document.py
-visualize_stats.py
-extract_stats.py
+helper_scripts/
 fig/
 *.pyc
 *.json

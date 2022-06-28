@@ -1,5 +1,5 @@
 import numpy as np
-from pylatex import Document, Tabularx, Document, Section, Subsection, Command, Itemize, Enumerate, Description, Figure, Table, Label, Ref, Marker
+from pylatex import Document, Tabularx, Document, Section, Subsection, Command, Itemize, Enumerate, Description, Figure, Table, Tabular, Label, Ref, Marker
 from pylatex.utils import bold, italic, NoEscape
 from stats_extractor import StatsExtractor
 from data_visualizer import DataVisualizer
@@ -50,23 +50,29 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
     doc = Document(doc_name, geometry_options=geometry_options)
 
     # Write title page
-    doc.preamble.append(Command(
-        "title",
-        f"User Report:\
-        \t{df['Account'].values[0]}\
-        ({df['PeriodStartDate'].values[0]} to {df['PeriodEndDate'].values[0]})"))
+    doc.preamble.append(Command("title","Giessen HPC - User Report"))
     doc.preamble.append(Command("author", "We, the Authors"))
     doc.preamble.append(Command("date", NoEscape(r"\today")))
     doc.append(NoEscape(r"\maketitle"))
 
+    with doc.create(Tabular("l l")) as table:
+        table.add_row(["Work Group:", df['Account'].values[0]])
+        table.add_row(["Time Frame:", f"{df['PeriodStartDate'].values[0]} - {df['PeriodEndDate'].values[0]}"])
+
     ## INTRODUCTION ##
     with doc.create(Section("Introduction")):
-        doc.append("Explain here:")
+
+        doc.append("This report provides an overview of the most meaningful values of cluster usage of one work group in a specific time period. \
+                It is divided into three parts:")
+        
         with doc.create(Itemize()) as itemize:
-            itemize.add_item("what the report is about")
-            itemize.add_item("how the user and partition splits work")
-            itemize.add_item("what a partition is (lol)")
-            itemize.add_item("how many and which users and partitions were included")
+            itemize.add_item("Section 2 - 'Basic Stats': Number of started and ended tasks in the given time frame")
+            itemize.add_item("Section 3 - 'Task Metrics': Task duration, allocated CPUs, and CPU time")
+            itemize.add_item("Section 4 - 'Termination Stats': Reasons for task termination")
+        
+        doc.append("In addition to the entire working group, Sections 2 and 3 also look at the individual users and the selected hardware.\
+                The hardware is specified in partitions, which stand for certain parameters under which computing tasks can run. \
+                The following partitions exist: serial, short, regular, debug, single, bigmem and long.")
 
     ## BASIC STATS ##
     doc.append(NoEscape(r"\pagebreak"))
@@ -101,8 +107,8 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             )
 
             doc.append(
-                f"A total of {n_over_ten_jobs} user(s) started and ended at least 10 jobs. \
-                The task metrics in Section 3 could only be calculated for these users."
+                f"A total of {n_over_ten_jobs} user(s) started and ended at least 10 tasks. \
+                Only for those users, boxplots are computed in Section 3"
             )
 
             with doc.create(Figure(position="h!")) as fig:
@@ -124,7 +130,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
 
             doc.append(
                 f"A total of {n_over_ten_jobs} partition(s) were used to complete (start and end) \
-                at least 10 jobs. The task metrics in Section 3 could only be calculated for these partitions."
+                at least 10 jobs. Only for those partitions, boxplots are computed in Section 3."
             )
 
             data = stats_dict["partition_split"]["basic_stats"]

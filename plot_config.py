@@ -20,6 +20,9 @@ def set_plot_config():
 
     plot_config['c_map'] = truncated_c_map
     plot_config['leg_loc'] = 'lower right'
+    plot_config['label_font_size'] = 14
+    plot_config['label_pad'] = 15
+    plot_config['tick_font_size'] = 14
     plot_config['leg_font_size'] = 8
     plot_config['bar_width'] = 0.35
     plot_config['dpi'] = 300

@@ -96,13 +96,13 @@ class DataVisualizer:
 
             fig, ax = plt.subplots() #figsize=(3,4)
 
-            end_bar = ax.barh(y = 0, width = end_value, color=self.plot_config['c_map'](0.8), height=self.plot_config['bar_width']) 
-            start_bar = ax.barh(y = 1 , width = start_value, color=self.plot_config['c_map'](0.2), height=self.plot_config['bar_width']) 
+            end_bar = ax.barh(y = 0.2, width = end_value, color=self.plot_config['c_map'](0.8), height=self.plot_config['bar_width']) 
+            start_bar = ax.barh(y = 0.8 , width = start_value, color=self.plot_config['c_map'](0.2), height=self.plot_config['bar_width']) 
 
-            ax.set_xlabel('Tasks')
+            ax.set_xlabel('Tasks', fontsize=self.plot_config['label_font_size'], labelpad=self.plot_config['label_pad'])
 
-            ax.set_yticks([0,1])
-            ax.set_yticklabels(['Ended', 'Started'])
+            ax.set_yticks([0.2,0.8])
+            ax.set_yticklabels(['Ended', 'Started'], fontsize = self.plot_config['tick_font_size'])
 
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -136,9 +136,9 @@ class DataVisualizer:
                 rects1 = ax.barh(y = y - self.plot_config['bar_width']/2, width = start_values, color = self.plot_config['c_map'](0.8), height=self.plot_config['bar_width'], label='Started')
                 rects2 = ax.barh(y = y + self.plot_config['bar_width']/2, width = end_values, color = self.plot_config['c_map'](0.2), height=self.plot_config['bar_width'], label='Ended')
                 
-                ax.set_xlabel('Tasks')
+                ax.set_xlabel('Tasks', fontsize=self.plot_config['label_font_size'], labelpad=self.plot_config['label_pad'])
                 ax.set_yticks(ticks=y)
-                ax.set_yticklabels(y_labels, rotation=0)
+                ax.set_yticklabels(y_labels, rotation=0, fontsize = self.plot_config['tick_font_size'])
                 ax.invert_yaxis()
 
                 ax.spines['top'].set_visible(False)
@@ -176,7 +176,7 @@ class DataVisualizer:
 
         metric_labels = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
         display_labels = ["Allocated CPUs", "Elapsed Time (min)", "CPU Time (min)"]
-        medianprops = dict(color=self.plot_config['c_map'](0.5))
+        medianprops = dict(color=self.plot_config['c_map'](0.7))
         
         # Create plot for full sample
         if split == "full":
@@ -306,7 +306,7 @@ class DataVisualizer:
 
         patches, labels, _ =  zip(*sorted(zip(patches, labels, values),key=lambda x: x[2], reverse=True))
 
-        plt.legend(patches, labels, loc=self.plot_config['leg_loc'], bbox_to_anchor=(1.3, 0.8))
+        plt.legend(patches, labels, loc='center', frameon = False) # bbox_to_anchor=(1.3, 0.8))
            
         my_circle=plt.Circle((0,0), 0.7, color='white')
         p=plt.gcf()

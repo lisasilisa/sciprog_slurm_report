@@ -312,6 +312,7 @@ class DataVisualizer:
         p=plt.gcf()
         p.gca().add_artist(my_circle)
 
+        plt.tight_layout()
         # Export plot if requested, else just display it
         if export_path:
             # If export path has no file ending, add one

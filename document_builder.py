@@ -108,7 +108,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
 
             doc.append(
                 f"A total of {n_over_ten_jobs} user(s) started and ended at least 10 tasks. \
-                Only for those users, boxplots are computed in Section 3"
+                Only for those users, boxplots are computed in Section 3."
             )
 
             with doc.create(Figure(position="h!")) as fig:
@@ -130,7 +130,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
 
             doc.append(
                 f"A total of {n_over_ten_jobs} partition(s) were used to complete (start and end) \
-                at least 10 jobs. Only for those partitions, boxplots are computed in Section 3."
+                at least 10 tasks. Only for those partitions, boxplots are computed in Section 3."
             )
 
             data = stats_dict["partition_split"]["basic_stats"]
@@ -149,7 +149,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             data = stats_dict["full"]["task_metrics"]
 
             doc.append(
-                f"In the full sample, the job durations ranged from \
+                f"In the full sample, the task durations ranged from \
                 {round(data['ElapsedRaw'][0]/60)} to {round(data['ElapsedRaw'][-2]/60)} minutes \
                 (M = {round(data['ElapsedRaw'][-1]/60)} min). "
             )
@@ -170,13 +170,13 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             data_array = np.zeros((8,3))
             for i, k in enumerate(data.keys()):
                 data_array[:,i] = data[k]
-            data_array[:,0] /= 60
+            data_array[:,1] /= 60
             data_array[:,2] /= 60
             data_array = np.round(data_array).astype(int)
             
             # Build table
             with doc.create(Table(position="h!")) as t:
-                build_table(doc=doc, data=data_array, col_names=["Job Duration", "Allocated CPUs", "CPU Time"],
+                build_table(doc=doc, data=data_array, col_names=["Allocated CPUs", "Task Duration (min)", "CPU Time"],
                             position_codes="c c c", index=["min", "5quant", "25quant", "median", "75quant", "95quant", "max", "mean"])
                 t.add_caption("Task metrics for the full sample.")
                 #Label()
@@ -184,7 +184,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             # Display plot
             with doc.create(Figure(position="h!")) as fig:
                 fig.add_image("fig/task_metrics_full.jpg", width="400px")
-                fig.add_caption("Distributions of job duration, allocated CPUs, and CPU time. Whiskers indicate the 5th and 95th percentiles.")  
+                fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time. Whiskers indicate the 5th and 95th percentiles.")  
 
         doc.append(NoEscape(r"\pagebreak"))
         with doc.create(Subsection("User Split")):
@@ -200,18 +200,18 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             for user_idx in range(len(user_names)):
                 for metric_idx, metric in enumerate(data.keys()):
                     metric_vals = data[metric][user_idx]
-                    if metric_idx == 1:
+                    if metric_idx == 0:
                         data_array[user_idx,metric_idx+1] = (round(metric_vals[0]), round(metric_vals[-1]), round(metric_vals[-2]))
                     else:
-                        data_array[user_idx,metric_idx+1] = (round(metric_vals[0]/60), round(metric_vals[-1]/60), round(metric_vals[-2]/60))
+                        data_array[user_idx,metric_idx+1] = (round(metric_vals[0])/60, round(metric_vals[-1]/60), round(metric_vals[-2]/60))
 
             #print(data_array)
             
             # Build table
             with doc.create(Table(position="h!")) as t:
-                build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Job Duration", "Allocated CPUs", "CPU Time"],
+                build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Allocated CPUs", "Task Duration", "CPU Time"],
                             position_codes="l c c c", index=user_names)
-                t.add_caption("Task metrics for different users. Values in parantheses indicate (min, mean, max).")
+                t.add_caption("Task metrics for different users. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
             # Show plot
             with doc.create(Figure(position="h!")) as fig:
@@ -232,7 +232,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             for partition_idx in range(len(partition_names)):
                 for metric_idx, metric in enumerate(data.keys()):
                     metric_vals = data[metric][partition_idx]
-                    if metric_idx == 1:
+                    if metric_idx == 0:
                         data_array[partition_idx,metric_idx+1] = (round(metric_vals[0]), round(metric_vals[-1]), round(metric_vals[-2]))
                     else:
                         data_array[partition_idx,metric_idx+1] = (round(metric_vals[0]/60), round(metric_vals[-1]/60), round(metric_vals[-2]/60))
@@ -241,13 +241,13 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
             
             # Build table
             with doc.create(Table(position="h!")) as t:
-                build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Job Duration", "Allocated CPUs", "CPU Time"],
+                build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Allocated CPUs", "Task Duration", "CPU Time"],
                             position_codes="l c c c", index=partition_names)
-                t.add_caption("Task metrics for different partitions. Values in parantheses indicate (min, mean, max).")
+                t.add_caption("Task metrics for different partitions. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
             # Show plot
             with doc.create(Figure(position="h!")) as fig:
-                fig.add_image("fig/task_metrics_user_split.jpg", width="350px")
+                fig.add_image("fig/task_metrics_partition_split.jpg", width="350px")
                 fig.add_caption("Distributions of job duration, allocated CPUs, and CPU time for different partitions. Whiskers indicate the 5th and 95th percentiles.") 
 
 

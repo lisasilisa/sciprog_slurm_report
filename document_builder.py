@@ -195,7 +195,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                 data = stats_dict["user_split"]["task_metrics"]
 
                 # Some text?
-                doc.append("Below, you can find the distributions of the task metrics for each user. In the table, all users are listed. Boxplots are only generated for users with at least 10 jobs.\n")
+                doc.append("Below, you can find the distributions of the task metrics for each user. In the table, all users are listed. Boxplots are only generated for users with at least 10 tasks.\n")
 
                 # Prepare data for table
                 data_array = np.zeros((len(user_names),4), dtype=tuple)
@@ -212,14 +212,14 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                 
                 # Build table
                 with doc.create(Table(position="h!")) as t:
-                    build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Allocated CPUs", "Task Duration", "CPU Time"],
+                    build_table(doc=doc, data=data_array, col_names=["Num Tasks", "Allocated CPUs", "Task Duration", "CPU Time"],
                                 position_codes="l c c c", index=user_names)
                     t.add_caption("Task metrics for different users. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
                 # Show plot
                 with doc.create(Figure(position="h!")) as fig:
                     fig.add_image("fig/task_metrics_user_split.jpg", width="350px")
-                    fig.add_caption("Distributions of job duration, allocated CPUs, and CPU time for different users. Whiskers indicate the 5th and 95th percentiles.") 
+                    fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different users. Whiskers indicate the 5th and 95th percentiles.") 
 
             doc.append(NoEscape(r"\pagebreak"))
         if "partition_split" in stats_dict.keys():
@@ -228,7 +228,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                 data = stats_dict["partition_split"]["task_metrics"]
 
                 # Some text?
-                doc.append("Below, you can find the distributions of the task metrics for each partition. In the table, all partitions are listed. Boxplots are only generated for partitions with at least 10 jobs.\n")
+                doc.append("Below, you can find the distributions of the task metrics for each partition. In the table, all partitions are listed. Boxplots are only generated for partitions with at least 10 tasks.\n")
 
                 # Prepare data for table
                 data_array = np.zeros((len(partition_names),4), dtype=tuple)
@@ -245,14 +245,14 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                 
                 # Build table
                 with doc.create(Table(position="h!")) as t:
-                    build_table(doc=doc, data=data_array, col_names=["Num Jobs", "Allocated CPUs", "Task Duration", "CPU Time"],
+                    build_table(doc=doc, data=data_array, col_names=["Num Tasks", "Allocated CPUs", "Task Duration", "CPU Time"],
                                 position_codes="l c c c", index=partition_names)
                     t.add_caption("Task metrics for different partitions. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
                 # Show plot
                 with doc.create(Figure(position="h!")) as fig:
                     fig.add_image("fig/task_metrics_partition_split.jpg", width="350px")
-                    fig.add_caption("Distributions of job duration, allocated CPUs, and CPU time for different partitions. Whiskers indicate the 5th and 95th percentiles.") 
+                    fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different partitions. Whiskers indicate the 5th and 95th percentiles.") 
 
 
     ## TERMINATION STATS ##
@@ -264,7 +264,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
 
         # Write text
         doc.append(
-            f"From the {sum(data.values())} jobs that started and ended in the given time frame,\
+            f"From the {sum(data.values())} tasks that started and ended in the given time frame,\
             {data['n_complete']} were completed successfully,\
             {data['n_cancelled']} were actively cancelled,\
             {data['n_timeout']} were ended due to a timeout,\

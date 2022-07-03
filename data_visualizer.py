@@ -175,7 +175,7 @@ class DataVisualizer:
         """
 
         metric_labels = ["AllocCPUS", "ElapsedRaw", "CPUTimeRaw"]
-        display_labels = ["Allocated CPUs", "Elapsed Time (min)", "CPU Time (min)"]
+        display_labels = ["Allocated CPUs", "Task Duration (min)", "CPU Time (min)"]
         medianprops = dict(color=self.plot_config['c_map'](0.7))
         
         # Create plot for full sample

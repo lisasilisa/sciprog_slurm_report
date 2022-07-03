@@ -218,7 +218,7 @@ class DataVisualizer:
             # Get unique users/partitions
             if split=="user_split":
                 split_labels = self.stats_dict["user_split"]["user_names"]
-                split_counts = self.stats_dict["user_split"]["user_counts"]
+                split_counts = self.stats_dict["user_split"]["user_counts"]      
             else:
                 split_labels = self.stats_dict["partition_split"]["partition_names"]
                 split_counts = self.stats_dict["partition_split"]["partition_counts"]
@@ -263,7 +263,10 @@ class DataVisualizer:
                 axs[i].yaxis.grid(linestyle=":")
 
             fig.tight_layout()
-            
+
+            if split == 'user_split' and len(split_labels) > 3:
+                fig.autofmt_xdate()
+    
         # Export plot if requested, else just display it
         if export_path:
             # If export path has no file ending, add one

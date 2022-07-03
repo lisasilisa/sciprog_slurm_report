@@ -62,9 +62,9 @@ class DataVisualizer:
 
         # Task metrics
         self.plot_task_metrics(split="full", export_path="fig/task_metrics_full.jpg")
-        if "user_split" in self.stats_dict.keys():
+        if "user_split" in self.stats_dict.keys() and any([count>=10 for count in self.stats_dict["user_split"]["user_counts"]]):
             self.plot_task_metrics(split="user_split", export_path="fig/task_metrics_user_split.jpg")
-        if "partition_split" in self.stats_dict.keys():
+        if "partition_split" in self.stats_dict.keys() and any([count>=10 for count in self.stats_dict["partition_split"]["partition_counts"]]):
             self.plot_task_metrics(split="partition_split", export_path="fig/task_metrics_partition_split.jpg")
 
         # Termination stats
@@ -209,8 +209,8 @@ class DataVisualizer:
                 # Other
                 axs[i].yaxis.grid(linestyle=":")
 
-
             fig.tight_layout()
+
 
         # Otherwise get split data
         elif split in ["user_split", "partition_split"]:
@@ -228,7 +228,9 @@ class DataVisualizer:
 
             # Load data
             data = np.zeros((len(metric_labels),6,len(split_labels)),dtype=int)
-            
+
+            print("Metric Labels:", metric_labels)
+            print("Split Labels:", split_labels)
             for i, metric_label in enumerate(metric_labels):
                 for j, split_label in enumerate(split_labels):
                     for k in range(6):
@@ -245,7 +247,7 @@ class DataVisualizer:
             for i, metric_label in enumerate(metric_labels):
                 
                 # Plot
-                axs[i].boxplot(data[i,:,:], usermedians=data[i,2,:], whis=[0,100], vert=True, medianprops=medianprops)
+                axs[i].boxplot(x=data[i,:,:], usermedians=data[i,2,:], whis=[0,100], vert=True, medianprops=medianprops)
                 # Axes
                 axs[i].set_ylabel(display_labels[i])
                 offset = 0.5*np.max(data[i,4,:])

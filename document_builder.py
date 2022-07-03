@@ -206,8 +206,7 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                         if metric_idx == 0:
                             data_array[user_idx,metric_idx+1] = (round(metric_vals[0]), round(metric_vals[-1]), round(metric_vals[-2]))
                         else:
-                            data_array[user_idx,metric_idx+1] = (round(metric_vals[0])/60, round(metric_vals[-1]/60), round(metric_vals[-2]/60))
-
+                            data_array[user_idx,metric_idx+1] = (round(metric_vals[0]/60), round(metric_vals[-1]/60), round(metric_vals[-2]/60))
                 #print(data_array)
                 
                 # Build table
@@ -216,10 +215,11 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                                 position_codes="l c c c", index=user_names)
                     t.add_caption("Task metrics for different users. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
-                # Show plot
-                with doc.create(Figure(position="h!")) as fig:
-                    fig.add_image("fig/task_metrics_user_split.jpg", width="350px")
-                    fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different users. Whiskers indicate the 5th and 95th percentiles.") 
+                # Show plot ( if any user has at least 10 tasks )
+                if any([count>=10 for count in user_counts]):
+                    with doc.create(Figure(position="h!")) as fig:
+                        fig.add_image("fig/task_metrics_user_split.jpg", width="350px")
+                        fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different users. Whiskers indicate the 5th and 95th percentiles.") 
 
             doc.append(NoEscape(r"\pagebreak"))
         if "partition_split" in stats_dict.keys():
@@ -249,10 +249,11 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
                                 position_codes="l c c c", index=partition_names)
                     t.add_caption("Task metrics for different partitions. Values in parantheses indicate (min, mean, max). Time is measured in seconds.")
 
-                # Show plot
-                with doc.create(Figure(position="h!")) as fig:
-                    fig.add_image("fig/task_metrics_partition_split.jpg", width="350px")
-                    fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different partitions. Whiskers indicate the 5th and 95th percentiles.") 
+                # Show plot ( if any partition has at least 10 tasks )
+                if any([count>=10 for count in partition_counts]):
+                    with doc.create(Figure(position="h!")) as fig:
+                        fig.add_image("fig/task_metrics_partition_split.jpg", width="350px")
+                        fig.add_caption("Distributions of task duration, allocated CPUs, and CPU time for different partitions. Whiskers indicate the 5th and 95th percentiles.") 
 
 
     ## TERMINATION STATS ##

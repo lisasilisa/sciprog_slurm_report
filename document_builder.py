@@ -1,11 +1,28 @@
 import numpy as np
+import pandas as pd
 from pylatex import Document, Tabularx, Document, Section, Subsection, Command, Itemize, Enumerate, Description, Figure, Table, Tabular, Label, Ref, Marker
 from pylatex.utils import bold, italic, NoEscape
 from stats_extractor import StatsExtractor
 from data_visualizer import DataVisualizer
 
 def build_table(doc:Document, data: np.ndarray, col_names: list=None,
-                    position_codes:list=None, index:list=None):
+                index:list=None, position_codes:list=None):
+    """
+    Writes a table on an input document based on a data array.
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Arguments:
+    doc: pylatex.Document; document to write on.
+    data: 2D np.ndarray; data to include in table.
+    col_names: list of strings.
+    index: list of strings.
+    position_codes: list of strings;
+                    indicates text position in columns;
+                    e.g. \begin{tabular}{l c c} would require ["l", "c", "c"] as input.
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Returns:
+    None
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    """
 
     # Get data dimensions
     m, n = data.shape
@@ -43,7 +60,20 @@ def build_table(doc:Document, data: np.ndarray, col_names: list=None,
                 table.add_row([index[i]] + list(data[i,:]))
         table.add_hline()
 
-def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
+def build_document(df: pd.DataFrame, stats_dict, viz_path="fig/", doc_name="slurm_report"):
+    """
+    Writes the report in LaTeX and creates a PDF file. 
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Arguments:
+    df: pd.DataFrame; cleaned dataframe used for report.
+    stats_dict: dict; as extracted in StatsExtractor.
+    viz_path: str; indicates where to store vizualisations.
+    doc_name: str; export name of document.
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Returns:
+    None
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    """
 
     # Initialize doc
     geometry_options = {"tmargin":"1.5cm", "lmargin":"3cm", "rmargin":"2.5cm", "bmargin":"1.5cm"}
@@ -279,4 +309,3 @@ def build_document(df, stats_dict, viz_path="fig/", doc_name="slurm_report"):
 
     # Export pdf
     doc.generate_pdf(clean_tex=False)
-    #doc.generate_tex()

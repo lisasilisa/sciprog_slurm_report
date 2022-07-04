@@ -52,6 +52,16 @@ class DataVisualizer:
         self.plot_config = plot_config
 
     def plot_all(self):
+        """
+        Generates all visualizations suitable for a report based on its stats_dict.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Arguments:
+        None
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Returns:
+        None
+        """
+
         
         # Basic stats
         self.plot_basic_stats(split="full", export_path="fig/basic_stats_full.jpg")
@@ -81,12 +91,6 @@ class DataVisualizer:
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
         Returns:
         None
-        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-        TO IMPLEMENT: 
-        * handle export_path 
-        * How to sort bar_plots descending: according to started or finished jobs? 
-
         """
         
         if split == "full":

@@ -32,10 +32,6 @@ OUT: dict of dicts, e.g.
     }
 }
 })
-
-IMPLEMENTED:
-* Extraction of all metrics
-
 """
 
 import pandas as pd
@@ -54,7 +50,16 @@ class StatsExtractor:
         self.user_counts = df["User"].value_counts(ascending=False).values.tolist()
 
 
-    def extract_stats(self):
+    def extract_stats(self) -> dict:
+        """
+        Extracts the full stats_dict.
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Arguments:
+        None
+        -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+        Returns:
+        dict; full stats dict.
+        """
 
         stats_dict = {}
 
@@ -80,7 +85,7 @@ class StatsExtractor:
 
         return stats_dict
 
-    def get_basic_stats(self, split:str="Full"):
+    def get_basic_stats(self, split:str="Full") -> dict:
         """
         Extracts basic stats:
             * number of jobs started
@@ -102,10 +107,8 @@ class StatsExtractor:
         if split=="Full":
 
             basic_dict = {}
-            
+
             basic_dict["n_start_end"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
-            #basic_dict["n_start_notend"] = ((self.df["StartDate"] >= self.df["PeriodStartDate"]) & (self.df["EndDate"] > self.df["PeriodEndDate"])).sum()
-            #basic_dict["n_notstart_end"] = ((self.df["StartDate"] < self.df["PeriodStartDate"]) & (self.df["EndDate"] <= self.df["PeriodEndDate"])).sum()
             basic_dict["n_start"] = (self.df["StartDate"] >= self.df["PeriodStartDate"]).sum()
             basic_dict["n_end"] = (self.df["EndDate"] <= self.df["PeriodEndDate"]).sum()
 
@@ -122,8 +125,6 @@ class StatsExtractor:
                 df_sub = self.df[self.df[split] == element] # Slice df down to specific user or partition
 
                 basic_dict["n_start_end"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
-                #basic_dict["n_start_notend"].append(((df_sub["StartDate"] >= df_sub["PeriodStartDate"]) & (df_sub["EndDate"] > df_sub["PeriodEndDate"])).sum())
-                #basic_dict["n_notstart_end"].append(((df_sub["StartDate"] < df_sub["PeriodStartDate"]) & (df_sub["EndDate"] <= df_sub["PeriodEndDate"])).sum())
                 basic_dict["n_start"].append((df_sub["StartDate"] >= df_sub["PeriodStartDate"]).sum())
                 basic_dict["n_end"].append((df_sub["EndDate"] <= df_sub["PeriodEndDate"]).sum())
                 
@@ -132,7 +133,7 @@ class StatsExtractor:
         return basic_dict
 
 
-    def get_task_metrics(self, split:str="Full"):
+    def get_task_metrics(self, split:str="Full") -> dict:
         """
         Extracts task metrics:
             * number of allocated CPUs
@@ -178,7 +179,7 @@ class StatsExtractor:
         return metrics_dict
 
 
-    def get_termination_stats(self):
+    def get_termination_stats(self) -> dict:
         """
         Extracts task metrics:
             * number of completed tasks

@@ -18,28 +18,6 @@ import matplotlib.ticker as ticker
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
-
-######################
-## HELPER FUNCTIONS ##
-######################
-
-def determine_grid_size(n_plots):
-    """
-    Determines an appropriate multiplot grid size to arange <n_plots> plots.
-    """
-
-    i, j = 1, 1
-    while i*j < n_plots:
-        if i > j+1:
-            if (i-1)*(j+1) == n_plots:
-                return i-1,j+1
-            else:
-                j += 1
-        else:
-            i += 1
-    return i,j
-
-
 #####################
 ## DATA VISUALIZER ##
 #####################
@@ -61,7 +39,6 @@ class DataVisualizer:
         Returns:
         None
         """
-
         
         # Basic stats
         self.plot_basic_stats(split="full", export_path="fig/basic_stats_full.jpg")
@@ -257,7 +234,6 @@ class DataVisualizer:
                 offset = 0.5*np.max(data[i,4,:])
                 y_min, y_max = 0, np.max(data[i,-1,:])
                 axs[i].set_ylim(y_min-offset, y_max+offset)
-                #axs[i].set_yticks([tick for tick in axs[i].get_yticks()])
                 # Labels
                 if i == len(metric_labels)-1:
                     axs[i].set_xticklabels(split_labels)

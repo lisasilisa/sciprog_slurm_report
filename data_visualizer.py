@@ -210,8 +210,6 @@ class DataVisualizer:
             # Load data
             data = np.zeros((len(metric_labels),6,len(split_labels)),dtype=int)
 
-            print("Metric Labels:", metric_labels)
-            print("Split Labels:", split_labels)
             for i, metric_label in enumerate(metric_labels):
                 for j, split_label in enumerate(split_labels):
                     for k in range(6):

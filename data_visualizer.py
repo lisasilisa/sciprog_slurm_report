@@ -1,16 +1,3 @@
-"""
-
-Basic Stats (Full Sample):
-    barplot with 2 bars (started, ended),
-    both indicating the share of not-ended started or not-started ended tasks.
-
-TaskMetrics (Full Sample):
-    Boxplot in multi-plot-frame for AllocCPUs, ElapsedRaw, CPUTimeRaw
-
-Termination Stats:
-    Pie/donut chart
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -24,7 +11,7 @@ import matplotlib.cm as cmx
 
 class DataVisualizer:
 
-    def __init__(self, stats_dict:str, plot_config:dict=None):
+    def __init__(self, stats_dict:dict, plot_config:dict=None):
         
         self.stats_dict = stats_dict
         self.plot_config = plot_config
@@ -58,7 +45,7 @@ class DataVisualizer:
         self.plot_termination_stats(export_path="fig/termination_stats_full.jpg")
 
 
-    def plot_basic_stats(self, split:str="full", export_path=None):
+    def plot_basic_stats(self, split:str="full", export_path:str=None):
         """
         Plots stats on the number of started/ended jobs in a barchart.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -143,7 +130,7 @@ class DataVisualizer:
             plt.show()
             
 
-    def plot_task_metrics(self, split:str="full", export_path=None):
+    def plot_task_metrics(self, split:str="full", export_path:str=None):
         """
         Plots stats on CPUTime, Elapsed time and AllocCPUS in a boxplot.
         -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

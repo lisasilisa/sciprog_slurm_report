@@ -1,8 +1,3 @@
-"""
-Notes:
-- make sure visualization path exists (i.e. fig/)
-"""
-
 from data_cleaner import data_cleaner
 from stats_extractor import StatsExtractor
 from data_visualizer import DataVisualizer
@@ -15,9 +10,7 @@ import numpy as np
 import json
 import os
 
-
 DATASET_PATH = "../dataset/slurmaccountdata/slurmaccountdata_shortened.csv"
-#ACCOUNT_NAME = "59628c0f-aa89-4a69"
 ACCOUNT_NAME = "627bc058-c28d-4680"
 START_DATE = "2021-08-01"
 END_DATE = "2021-08-31"
@@ -41,6 +34,7 @@ def main():
     #print(stats_dict)
 
     print("... creating visualizations ... (4/5)")
+    # Make sure fig/ path exists
     if not os.path.isdir("./fig"):
         os.mkdir("./fig/")
         

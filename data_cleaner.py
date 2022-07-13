@@ -9,7 +9,7 @@ IN: dataframe
 OUT: cleaned dataframe
 """
 
-def data_cleaner(dataset, account:str, period_start_date:str, period_end_date:str):
+def data_cleaner(dataset: pd.DataFrame, account:str, period_start_date:str, period_end_date:str):
     """
     Execution of the individual steps to clean up the dataframe:
         * get relevant columns
@@ -39,7 +39,7 @@ def data_cleaner(dataset, account:str, period_start_date:str, period_end_date:st
     return subset
 
 
-def get_rel_cols(dataset):
+def get_rel_cols(dataset: pd.DataFrame):
     """
     Define relevant columns of the dataframe
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -55,7 +55,7 @@ def get_rel_cols(dataset):
     return dataset
 
 
-def get_account_data(dataset, account):
+def get_account_data(dataset: pd.DataFrame, account: str):
     """
     Filter out data from one account
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -71,7 +71,7 @@ def get_account_data(dataset, account):
     return dataset
 
 
-def update_to_consistent_cols_names(dataset):
+def update_to_consistent_cols_names(dataset: pd.DataFrame):
     """
     Name columns consistently, e.g. always Raw instead of RAW
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -86,7 +86,7 @@ def update_to_consistent_cols_names(dataset):
     return dataset
     
 
-def add_start_and_end_date_cols(dataset):
+def add_start_and_end_date_cols(dataset: pd.DataFrame):
     """
     Add columns containing start and end days of tasks as datetime objects
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -107,7 +107,7 @@ def add_start_and_end_date_cols(dataset):
     
     return dataset
 
-def add_per_start_and_end_date_cols(dataset, period_start_date:str, period_end_date:str):
+def add_per_start_and_end_date_cols(dataset: pd.DataFrame, period_start_date:str, period_end_date:str):
     """
     Add columns for period start and end days and fill whole columns with the passing string values
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -126,7 +126,7 @@ def add_per_start_and_end_date_cols(dataset, period_start_date:str, period_end_d
 
     
 
-def get_rel_time_data(dataset, period_start_date:str, period_end_date:str):
+def get_rel_time_data(dataset: pd.DataFrame, period_start_date:str, period_end_date:str):
     """ 
     Filter out data to get tasks which start or/and end in period
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -149,7 +149,7 @@ def get_rel_time_data(dataset, period_start_date:str, period_end_date:str):
     return dataset
 
 
-def clean_state_col(dataset):
+def clean_state_col(dataset: pd.DataFrame):
     """
     Replace 'CANCELLED by INDEX' entries in column State with 'CANCELLED'
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

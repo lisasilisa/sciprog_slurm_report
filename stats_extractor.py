@@ -17,10 +17,9 @@ OUT: dict of dicts, e.g.
         "user_names": list,
         "user_counts": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
-        "task_metrics": {"alloccpu":[[user1min, user125quant, user1median, user1max, user1mean],
-                                     [user2min, user225quant, user2median, user275quant, user2mean]
+        "task_metrics": {"alloccpu":[[user1_min, user1_05quant, user1_25quant, user1_median, user1_75quant, user1_95quant, user1_max, user1mean],
+                                     [user2_min, user2_05quant, user2_25quant, user2_median, user2_75quant, user2_95quant, user2_max, user2mean],
                                      ...]}
-        # NO TERMINATION SUBDICT
     },
 
     "partition_split:{
@@ -28,7 +27,6 @@ OUT: dict of dicts, e.g.
         "partition_counts": list,
         "basic_stats": {"num_started_and_ended":list[int], ...},
         "task_metrics": ...,
-        # NO TERMINATION SUBDICT
     }
 }
 })
@@ -41,7 +39,7 @@ import numpy as np
 class StatsExtractor:
 
 
-    def __init__(self, df):
+    def __init__(self, df: pd.DataFrame):
         self.df = df
         self.account = df["Account"].iloc[0]
         self.partitions = df["Partition"].value_counts(ascending=False).index.tolist()

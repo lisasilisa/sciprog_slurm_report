@@ -101,7 +101,8 @@ def build_document(df: pd.DataFrame, stats_dict: dict, doc_config:dict):
                 f"In the given time frame, {data['n_start']} tasks were started \
                 and {data['n_end']} ended. {data['n_start_end']} \
                 ({round(data['n_start_end'] / (data['n_end']+data['n_start']-data['n_start_end'])*100,2)} %) \
-                of them started and ended within the given time frame."
+                of them started and ended within the given time frame. \
+                Sections 2 and 3 will only consider those tasks which started and ended within the given time frame."
             )
 
             with doc.create(Figure(position="h!")) as fig:

@@ -4,7 +4,22 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 
 
+
+
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    """
+    Extract subset of colormap (to only get colors in a specific range)
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Arguments:
+    cmap: matplotlib.colors.Colormap; colormap
+    minval: float; new min value, default is old min value
+    maxval: float; new max value, default is old max value
+    n: int; number of sampled points from the old colormap
+
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Returns: new_cmap: matplotlib.colors.Colormap
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    """
     new_cmap = colors.LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
@@ -13,6 +28,11 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 
 
 def set_plot_config():
+    """
+    Set default values for visualization
+    -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    Returns: plot_config: dict
+    """
     plot_config = {}
 
     c_map = plt.get_cmap('Blues')  

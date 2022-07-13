@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import date
-from datetime import datetime
+from datetime import datetime, timedelta
 
 """
 Cleans dataframe and prepare for further processing (e.g. to extracts stats)
@@ -142,8 +142,8 @@ def get_rel_time_data(dataset: pd.DataFrame, period_start_date:str, period_end_d
     period_start_date_dt = pd.to_datetime(period_start_date)
     period_end_date_dt = pd.to_datetime(period_end_date)
 
-    subset = dataset[(dataset['StartDate'] < period_start_date_dt) | (dataset['StartDate'] > period_end_date_dt)] # tasks that do not start in period
-    subset = subset[(subset['EndDate'] < period_start_date_dt) | (subset['EndDate'] > period_end_date_dt)] # tasks that additionally also do not end in period
+    subset = dataset[(dataset['StartDate'] < period_start_date_dt) | (dataset['StartDate'] >= period_end_date_dt + timedelta(days=1))] # tasks that do not start in period
+    subset = subset[(subset['EndDate'] < period_start_date_dt) | (subset['EndDate'] >= period_end_date_dt + timedelta(days=1))] # tasks that additionally also do not end in period
     dataset = dataset[~dataset.index.isin(subset.index)] # all tasks except those that neither start nor end in period
 
     return dataset

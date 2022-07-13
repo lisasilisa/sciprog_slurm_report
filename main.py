@@ -12,11 +12,15 @@ from plot_config import set_plot_config
 import pandas as pd
 import numpy as np
 
+import json
+import os
+
 
 DATASET_PATH = "../dataset/slurmaccountdata/slurmaccountdata_shortened.csv"
-ACCOUNT_NAME = "59628c0f-aa89-4a69"
-START_DATE = "2020-02-01"
-END_DATE = "2021-09-30"
+#ACCOUNT_NAME = "59628c0f-aa89-4a69"
+ACCOUNT_NAME = "627bc058-c28d-4680"
+START_DATE = "2021-08-01"
+END_DATE = "2021-08-31"
 
 def main():
 
@@ -37,14 +41,18 @@ def main():
     #print(stats_dict)
 
     print("... creating visualizations ... (4/5)")
+    if not os.path.isdir("./fig"):
+        os.mkdir("./fig/")
+        
     Viz = DataVisualizer(stats_dict, set_plot_config())
     Viz.plot_all()
 
     print("... building document ... (5/5)")
-    build_document(cleaned_dataset, stats_dict, viz_path="fig/", doc_name="text_doc")
+    with open("doc_config.json", "r") as file:
+        doc_config = json.load(file)
+    build_document(cleaned_dataset, stats_dict, doc_config)
     
     print("... report finished ...")
-
 
 if __name__ == "__main__":
     main()

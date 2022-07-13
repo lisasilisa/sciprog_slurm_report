@@ -60,15 +60,14 @@ def build_table(doc:Document, data: np.ndarray, col_names: list=None,
                 table.add_row([index[i]] + list(data[i,:]))
         table.add_hline()
 
-def build_document(df: pd.DataFrame, stats_dict, viz_path="fig/", doc_name="slurm_report"):
+def build_document(df: pd.DataFrame, stats_dict: dict, doc_config:dict):
     """
     Writes the report in LaTeX and creates a PDF file. 
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
     Arguments:
     df: pd.DataFrame; cleaned dataframe used for report.
     stats_dict: dict; as extracted in StatsExtractor.
-    viz_path: str; indicates where to store vizualisations.
-    doc_name: str; export name of document.
+    doc_config: dict extracted from doc_config.json
     -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
     Returns:
     None
@@ -76,12 +75,11 @@ def build_document(df: pd.DataFrame, stats_dict, viz_path="fig/", doc_name="slur
     """
 
     # Initialize doc
-    geometry_options = {"tmargin":"1.5cm", "lmargin":"3cm", "rmargin":"2.5cm", "bmargin":"1.5cm"}
-    doc = Document(doc_name, geometry_options=geometry_options)
+    doc = Document(doc_config["doc_name"], geometry_options=doc_config["geometry_options"])
 
     # Write title page
-    doc.preamble.append(Command("title","Giessen HPC - User Report"))
-    doc.preamble.append(Command("author", "We, the Authors"))
+    doc.preamble.append(Command("title",doc_config["title"]))
+    doc.preamble.append(Command("author", doc_config["author"]))
     doc.preamble.append(Command("date", NoEscape(r"\today")))
     doc.append(NoEscape(r"\maketitle"))
 
@@ -89,20 +87,7 @@ def build_document(df: pd.DataFrame, stats_dict, viz_path="fig/", doc_name="slur
         table.add_row(["Work Group:", df['Account'].values[0]])
         table.add_row(["Time Frame:", f"{df['PeriodStartDate'].values[0]} - {df['PeriodEndDate'].values[0]}"])
 
-    ## INTRODUCTION ##
-    with doc.create(Section("Introduction")):
-
-        doc.append("This report provides an overview of the most meaningful values of cluster usage of one work group in a specific time period. \
-                It is divided into three parts:")
-        
-        with doc.create(Itemize()) as itemize:
-            itemize.add_item("Section 2 - 'Basic Stats': Number of started and ended tasks in the given time frame")
-            itemize.add_item("Section 3 - 'Task Metrics': Task duration, allocated CPUs, and CPU time")
-            itemize.add_item("Section 4 - 'Termination Stats': Reasons for task termination")
-        
-        doc.append("In addition to the entire working group, Sections 2 and 3 also look at the individual users and the selected hardware.\
-                The hardware is specified in partitions, which stand for certain parameters under which computing tasks can run. \
-                The following partitions exist: serial, short, regular, debug, single, bigmem and long.")
+    doc.append(NoEscape(r"\tableofcontents"))
 
     ## BASIC STATS ##
     doc.append(NoEscape(r"\pagebreak"))

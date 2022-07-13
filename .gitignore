@@ -5,7 +5,6 @@ doc_builder_exploration/
 helper_scripts/
 fig/
 *.pyc
-*.json
 *.jpg
 *.png
 *.tex

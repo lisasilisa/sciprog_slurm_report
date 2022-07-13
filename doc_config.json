@@ -1,0 +1,12 @@
+{
+    "geometry_options":{
+        "lmargin": "3cm",
+        "rmargin": "2.5cm",
+        "tmargin": "1.5cm",
+        "bmargin": "1.5cm"
+    },
+
+    "doc_name": "my_report",
+    "title": "My Title",
+    "author": "We, the Authors"
+}
